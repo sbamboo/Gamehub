@@ -4,27 +4,27 @@
 
 ### The format requires the following methods and arguments inside the class
 
-
+\n
 **create**
 
 creates a scoreboard, taking "scoreboard" of string and optionally "key" of string
 
-
+\n
 **remove**
 
 removes a scoreboard, taking "scoreboard" of string and optionally "key" of string
 
-
+\n
 **get**
 
 gets the content of a scoreboard, taking "scoreboard" of string and optionally "key" of string
 
-
+\n
 **append**
 
 appends a value of dictionary to the scoreboard, taking "scoreboard" of string "jsonDict" of dictionary and optionally "key" of string
 
-
+\n
 **doesExist**
 
 checks weather or not a scoreboard exists, taking "scoreboard" of string and optionally "key" of string
