@@ -1,19 +1,19 @@
-#markdown-content h1 {
+h1 {
     display: none;
 }
-#markdown-content body {
+body {
     margin-left: auto;
     margin-right: auto;
     width: 70%;
     font-family: "Varela Round";
     font-size: 19px;
 }
-#markdown-content h2 {
+h2 {
     text-align: center;
     font-size: 45px;
     font-family: "Helvetica";
 }
-#markdown-content img {
+img {
     border-radius: 40px;
     max-width: 50%;
     padding-top: 15px;
@@ -21,41 +21,41 @@
 
 
 @media screen and (prefers-color-scheme: ligth) {
-    #markdown-content body {
+    body {
         background-color: rgb(255, 255, 255);
         color: Black;
     }
-    #markdown-content h2 {
+    h2 {
         color: rgb(0, 0, 0);
         border-bottom: 2px solid black;
     }
-    #markdown-content p {
+    p {
         color: rgb(44, 44, 44);
     }
-    #markdown-content i {
+    i {
         color: rgb(80, 80, 80);
     }
-    #markdown-content b {
+    b {
         color: rgb(32, 32, 32);
     }
 }
 
 @media screen and (prefers-color-scheme: dark) {
-    #markdown-content body {
+    body {
         background-color: #1f2227;
         color: white;
     }
-    #markdown-content h2 {
+    h2 {
         border-bottom: 2px solid white;
         color: white;
     }
-    #markdown-content p {
+    p {
         color: white;
     }
-    #markdown-content i {
+    i {
         color: rgb(160, 160, 160);
     }
-    #markdown-content b {
+    b {
         color: white;
     }
 }
