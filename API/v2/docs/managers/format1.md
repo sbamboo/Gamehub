@@ -1,4 +1,5 @@
 #Format 1
+
 **The manager python file should include a variable called "managerFormat" being a list of two entries, first the formatNumber being an integer, secondly a link to the format information (like this page), then the file should include a class called "Manager"**
 
 ###The format requires the following methods and arguments inside the class
