@@ -20,4 +20,3 @@ appends a value of dictionary to the scoreboard, taking "scoreboard" of string "
 checks weather or not a scoreboard exists, taking "scoreboard" of string and optionally "key" of string
 
 *Format was created on 2023-05-03*
-[exampleLink](http://example.com)
