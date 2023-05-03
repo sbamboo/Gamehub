@@ -4,19 +4,29 @@
 
 ### The format requires the following methods and arguments inside the class
 
+
 **create**
+
 creates a scoreboard, taking "scoreboard" of string and optionally "key" of string
 
+
 **remove**
+
 removes a scoreboard, taking "scoreboard" of string and optionally "key" of string
 
+
 **get**
+
 gets the content of a scoreboard, taking "scoreboard" of string and optionally "key" of string
 
+
 **append**
+
 appends a value of dictionary to the scoreboard, taking "scoreboard" of string "jsonDict" of dictionary and optionally "key" of string
 
+
 **doesExist**
+
 checks weather or not a scoreboard exists, taking "scoreboard" of string and optionally "key" of string
 
 *Format was created on 2023-05-03*
