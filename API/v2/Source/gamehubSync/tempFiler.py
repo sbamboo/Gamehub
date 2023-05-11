@@ -16,47 +16,59 @@ def createTempDir() -> str:
     return temp_folder
 
 # Function to save a dictionary to a tempFile
-def saveDict(securityLevel=int(),encType=None,encKey=None,hashType=None, fileName=str(), content=dict()):
+def saveDict(securityLevel=int(),encType=None,encKey=None,hashType=None, tempFolder=str(), fileName=str(), content=dict()):
     # Import encryption lib
     if encType == "legacy":
         from ..libs.libcrypto.legacy import encdec
     elif encType == "aes":
         from ..libs.libcrypto.aes import encdec
     # Get secure fileName
-    fileId = hashString(message=fileName, )
+    fileId = hashString(message=fileName, hashType=hashType)
     toSave = json.dumps(content)
     # encrypt
     isEnc = False
     if securityLevel == 2 or securityLevel == 3:
         isEnc = True
-        toSave = self.cryptLib.encdec(key=self.encKey,inputs=toSave,mode="enc")
+        toSave = encdec(key=encKey,inputs=toSave,mode="enc")
     # Should hash
     isHashed = False
     if securityLevel == 1 or securityLevel == 3:
         isHashed = True
     # Save file
-    filePath = os.path.join(self.tempDir, f"{fileId}.ghs") # ghs = GamehubSync File
+    filePath = os.path.join(tempFolder, f"{fileId}.ghs") # ghs = GamehubSync File
     fs.writeToFile(inputs=toSave,filepath=filePath,autocreate=True)
-    self.savedFiles[fileId] = {"path":filePath,"encrypted":isEnc,"hashed":isHashed, "hash":None}
-    # hash
-    if isHashed == True:
-        self.savedFiles[fileId]["hash"] = hashFile(filePath, self.hashType)
-    return fileId
+    # Return file
+    return str(hashFile(filePath, hashType))
 
 # Function to load a dictionary from a tempFile
-def loadDict(fileId=str()) -> dict:
-    fileMeta = self.savedFiles[fileId]
-    filePath = fileMeta["path"]
+def loadDict(securityLevel=int(),encType=None,encKey=None,hashType=None, tempFolder=str(), fileName=str(), filehash=str()) -> dict:
+    # Import encryption lib
+    if encType == "legacy":
+        from ..libs.libcrypto.legacy import encdec
+    elif encType == "aes":
+        from ..libs.libcrypto.aes import encdec
+    # encrypt
+    isEnc = False
+    if securityLevel == 2 or securityLevel == 3:
+        isEnc = True
+        toSave = encdec(key=encKey,inputs=toSave,mode="enc")
+    # Should hash
+    isHashed = False
+    if securityLevel == 1 or securityLevel == 3:
+        isHashed = True
+    # Get secure fileName
+    fileId = hashString(message=fileName, hashType=hashType)
+    # Filepath
+    filePath = os.path.join(tempFolder, f"{fileId}.ghs") # ghs = GamehubSync File
     # Match hash
-    fileHash = hashFile(filePath, self.hashType)
-    if str(fileHash) != str(fileMeta["hash"]):
-        raise Exception("Hash of file didn't match, loading aborted!")
-        return {}
+    if isHashed == True:
+        fileHash = hashFile(filePath, hashType)
+        if str(fileHash) != filehash:
+            raise Exception("Hash of file didn't match, loading aborted!")
     # Get content
     toGive = fs.readFromFile(filePath)
     # Decrypt content
-    
-    if fileMeta["encrypted"] == True:
-        toGive = self.cryptLib.encdec(key=self.encKey,inputs=toGive,mode="dec")
+    if isEnc == True:
+        toGive = encdec(key=encKey,inputs=toGive,mode="dec")
     # Convert to dictionary
     return json.loads(toGive)
