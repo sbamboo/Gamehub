@@ -135,9 +135,3 @@ def unregisterManager(**kwargs):
        name = <str>,        Name of manager to unregister.
     '''
     manAPI.unregisterManager(**kwargs)
-
-# Internal test function REMOVE LATER
-def Test():
-    managerFile = os.path.join(os.path.dirname(__file__),"managers.jsonc")
-    scoreboard = scoreboardConnector(encryptionType="aes",storageType="pantry",key="UOVTOW3r5jXjsrMGOE4JUc+xKLKfr6Z6Gjc1BQPh/5XqWjhr",kryptographyKey="GameHubEncryptionKey_8aknd1zoa1-dwa1aa_v1",managersFile=managerFile)
-    print( scoreboard.get("snake") )
