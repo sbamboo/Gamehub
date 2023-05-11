@@ -1,0 +1,9 @@
+Note! Internal means inside/imported-to python whilst external means usable from commandline or non-python programs
+
+gamehubAPI.py: Internal file with the main scoreboard system aswell as the gamehub_userData function.
+managerAPI.py: Internal file with the functions to register/unregister manager functions.
+tempfileAPI.py: Internal file with the functions for tempFile management.
+quickuseAPI.py: Internal file for some quickuse functions.
+syncAPI.py: External file that allowes for execution of the above features, Note! the scoreboard system can only be used indirectly via a function
+
+_internal_saveService.py: This is for inAPI use only dont use!

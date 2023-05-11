@@ -1,3 +1,5 @@
+# Libhasher 1.0 by Simon Kalmi Claesson
+
 import hashlib
 
 # Functions for hashing files

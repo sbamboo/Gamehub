@@ -1,9 +1,9 @@
-import json,os
+import json,os,subprocess
 from libs.importa import fromPath
-import ManagerAPI as manAPI
+import managerAPI as manAPI
 
 # requireAPI
-def requireAPI(apiVid=str(),verFileOverwrite=None):
+def gamehub_requireAPI(apiVid=str(),verFileOverwrite=None):
     if verFileOverwrite == None: verFileOverwrite = f"{os.path.dirname(__file__)}\\API.json"
     rawAPIdata = json.loads(open(verFileOverwrite,'r').read())
     matching = False
@@ -116,22 +116,65 @@ class scoreboardConnector():
     def EncDecDict(self,_dict,mode):
         return self.encdec_dict(key=self.kryptokey,dictionary=_dict,mode=mode)
 
-# ManagerAPI passthrough
-def registerManager(**kwargs):
-    '''
-       (Passthrough of ManagerAPI.registerManager)
-       Registers a manager, by default in the global manager file. If your custom manager file is wanted give it's path to managerFile.
-       managerFile = <str>, Supply managerFile, otherwise will fallback to "os.path.dirname(__file__)\\managers.jsonc"
-       name = <str>,        Name of manager to register.
-       path = <str>,        Path to the manager that will be registered. (.py files only)
-       needKey = <bool>,    Whether or not the manager needs a key. (Encryption is choosen by user, so al cryptolib ones should be available or inform user otherwise)
-    '''
-    manAPI.registerManager(**kwargs)
-def unregisterManager(**kwargs):
-    '''
-       (Passthrough of ManagerAPI.registerManager)
-       Unregisters a manager, by default in the global manager file. If your custom manager file is wanted give it's path to managerFile.
-       managerFile = <str>, Supply managerFile, otherwise will fallback to "os.path.dirname(__file__)\\managers.jsonc"
-       name = <str>,        Name of manager to unregister.
-    '''
-    manAPI.unregisterManager(**kwargs)
+# Function to get TOS
+def gamehub_getTOS(net=bool()):
+    if net == True:
+        import requests
+        r = requests.get("https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/tos.txt", allow_redirects=True)
+        return r.content
+    else:
+        return open("..\\tos.txt",'r').read()
+
+# Main function for handling a scoreboard from a function
+def gamehub_scoreboardFunc(
+        encType=None,manager=None,apiKey=None,encKey=None,managerFile=None,ignoreManFormat=None,
+        scoreboard=str(),jsonData=str(),
+        create=False,remove=False,get=False,append=False, doesExist=False
+    ):
+    # Create scoreboardConnector
+    scoreboard = scoreboardConnector(encryptionType=encType, storageType=manager, key=apiKey, kryptographyKey=encKey, managersFile=managerFile, ignoreManagerFormat=ignoreManFormat)
+    # Actions
+    if create == True: scoreboard.create(scoreboard=scoreboard,jsonDict=jsonData)
+    elif remove == True: scoreboard.remove(scoreboard=scoreboard)
+    elif get == True: scoreboard.get(scoreboard=scoreboard)
+    elif append == True: scoreboard.append(scoreboard=scoreboard,jsonDict=jsonData)
+    elif doesExist == True: scoreboard.doesExist(scoreboard=scoreboard)
+
+# Function to handle userData
+def gamehub_userData(
+        encType=None,manager=None,apiKey=None,encKey=None,managerFile=None,ignoreManFormat=None,
+        scoreboard=str(),user=None,dictData=None,
+        saveUser=False,getUser=False,updateUser=False,getAllUsers=False, doesExist=False,mRemove=False,
+    ):
+    # Create scoreboardConnector
+    scoreboard = scoreboardConnector(encryptionType=encType, storageType=manager, key=apiKey, kryptographyKey=encKey, managersFile=managerFile, ignoreManagerFormat=ignoreManFormat)
+    # Actions
+    if saveUser == True:
+        if user != None and dictData != None:
+            _dict = {user: dictData}
+            jsonData = json.dumps(_dict)
+            return scoreboard.create(scoreboard=scoreboard,jsonDict=jsonData)
+    elif mRemove == True: # 3 requests
+        # get data from scoreboard
+        _json = scoreboard.get(scoreboard=scoreboard)
+        try: _dict = json.loads(_json)
+        except: return _json
+        # remove user
+        _dict.pop(user)
+        # remove scoreboard
+        scoreboard.remove(scoreboard=scoreboard)
+        # create scoreboard with modified data
+        scoreboard.create(scoreboard=scoreboard,jsonDict=_dict)
+    elif getUser == True:
+        _json = scoreboard.get(scoreboard=scoreboard)
+        try: _dict = json.loads(_json)
+        except: return _json
+        return _dict[user]
+    elif updateUser == True:
+        _dict = {user: dictData}
+        jsonData = json.dumps(_dict)
+        return scoreboard.append(scoreboard=scoreboard,jsonDict=jsonData)
+    elif doesExist == True:
+        return scoreboard.doesExist(scoreboard=scoreboard)
+    elif getAllUsers == True:
+        return scoreboard.get(scoreboard=scoreboard)

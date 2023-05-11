@@ -24,7 +24,7 @@ class Manager():
     def create(self,key,scoreboard=str(),json=None):
         doesExist = self.doesExist(key,scoreboard=scoreboard)
         if doesExist != True:
-            if json:
+            if json != None:
                 ans = self.api(key, "POST", basket=scoreboard, body=json)
             else:
                 ans = self.api(key, "POST", basket=scoreboard)
