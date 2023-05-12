@@ -22,8 +22,6 @@ def gamehub_userData(
         except: return _json
         # remove user
         _dict.pop(user)
-        # remove scoreboard
-        scoreboard.remove(scoreboard=scoreboard)
         # create scoreboard with modified data
         scoreboard.create(scoreboard=scoreboard,jsonDict=_dict)
     elif getUser == True:

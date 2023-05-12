@@ -1,8 +1,20 @@
-import json,os,uuid,tempfile,argparse,sys
-from libs.importa import fromPath
-from libs.libhasher import hashFile,hashString
-from libs.libfilesys import filesys as fs
+# Imports & Setup
+import json,os,uuid,tempfile,argparse,sys,importlib.util
 parentPath = os.path.dirname(__file__)
+
+# Functions
+def fromPath(path):
+    spec = importlib.util.spec_from_file_location("module", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+# Dynnamic imports
+libhasher = fromPath(f"{parentPath}\\libs\\libhasher.py")
+hashFile = libhasher.hashFile
+hashString = libhasher.hashString
+libfilesys = fromPath(f"{parentPath}\\libs\\libfilesys.py")
+fs = libfilesys.filesys
 
 # ========================================================[require API]========================================================
 def requireAPI(apiVid=str(),verFileOverwrite=None):
@@ -273,7 +285,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog="GamehubAPI")
     # Flags
     ## [requireAPI]
-    parser.add_argument('--requireAPI','--require', action='store_true', help="Function to check/require an API version to be installed.")
+    parser.add_argument('--requireAPI','--require', dest="requireAPI", action='store_true', help="Function to check/require an API version to be installed.")
     ## [ManagerAPI]
     parser.add_argument('--registerManager','--regMan', action='store_true', help="Function to register a manager.")
     parser.add_argument('--unregisterManager','--unregMan', action='store_true', help="Function to unregister a manager.")
@@ -323,6 +335,23 @@ if __name__ == '__main__':
     parser.add_argument('autoComsume', nargs='*', help="AutoConsume")
     # Get Inputs
     args = parser.parse_args(sys.argv)
+    # [requireAPI]
+    if args.requireAPI == True:
+        out = requireAPI(apiVid=args.m_apiVid,verFileOverwrite=args.m_verFileOverwrite)
+        print(out)
+    # [managerAPI]
+    if args.registerManager == True:
+        if args.mg_managerFile:
+            out = registerManager(managerFile=args.mg_managerFile,name=args.mg_name,path=args.mg_path,needKey=args.mg_needKey)
+        else:
+            out = registerManager(name=args.mg_name,path=args.mg_path,needKey=args.mg_needKey)
+        print(out)
+    if args.unregisterManager == True:
+        if args.mg_managerFile:
+            out = registerManager(managerFile=args.mg_managerFile,name=args.mg_name)
+        else:
+            out = unregisterManager(name=args.mg_name)
+        print(out)
     # [tempfileAPI]
     if args.createTempDir == True:
         out = createTempDir()
@@ -339,24 +368,13 @@ if __name__ == '__main__':
     if args.loadDict == True:
         out = loadDict(securityLevel=args.tf_securityLevel,encType=args.tf_encType,encKey=args.tf_encKey,hashType=args.tf_hashType,tempFolder=args.tf_tempFolder, fileName=args.tf_fileName, filehash=args.tf_fileHash)
         print(out)
-    # [requireAPI]
-    if args.require == True:
-        pass
-    # [managerAPI]
-    if args.registerManager == True:
-        if args.mg_managerFile:
-            out = registerManager(managerFile=args.mg_managerFile,name=args.mg_name,path=args.mg_path,needKey=args.mg_needKey)
-        else:
-            out = registerManager(name=args.mg_name,path=args.mg_path,needKey=args.mg_needKey)
+    # [mainAPI]
+    if args.getTOS == True:
+        out = gamehub_getTOS(net=args.m_net)
         print(out)
-    if args.unregisterManager == True:
-        if args.mg_managerFile:
-            out = registerManager(managerFile=args.mg_managerFile,name=args.mg_name)
-        else:
-            out = unregisterManager(name=args.mg_name)
+    if args.rq_verFileOverwrite == True:
+        out = gamehub_scoreboardFunc(encType=args.m_encType,manager=args.m_manager,apiKey=args.m_apiKey,encKey=args.m_encKey,managerFile=args.m_managerFile,ignoreManFormat=args.m_ignoreManFormat,scoreboard=args.m_scoreboard,jsonData=args.m_jsonData,create=args.m_create,remove=args.m_remove,get=args.m_get,append=args.m_append,doesExist=args.m_doesExist)
         print(out)
-
-
 
 # Info
 # registering should start with choosing a security level:
@@ -367,22 +385,22 @@ if __name__ == '__main__':
 
 # Examples of tempFile management
 ## Creation of tempPath:
-# $tempPath = python3 syncAPI.py --createTempDir
-# python3 syncAPI.py --deleteTempDir --tempFolder $tempPath
+# $tempPath = python3 gamehubAPI.py --createTempDir
+# python3 gamehubAPI.py --deleteTempDir --tempFolder $tempPath
 ## SecurityLevel 0:
-# python3 syncAPI.py --saveDict -tf_slvl 0 -tf_tempFolder $tempPath -tf_fileName "bob" -tf_jsonStr '{"bob":5}'
-# python3 syncAPI.py --loadDict -tf_slvl 0 -tf_tempFolder $tempPath -tf_fileName "bob"
+# python3 gamehubAPI.py --saveDict -tf_slvl 0 -tf_tempFolder $tempPath -tf_fileName "bob" -tf_jsonStr '{"bob":5}'
+# python3 gamehubAPI.py --loadDict -tf_slvl 0 -tf_tempFolder $tempPath -tf_fileName "bob"
 ## SecurityLevel 1:
-# $fileHash = python3 syncAPI.py --saveDict -tf_slvl 1 -tempFolder $tP -tf_fileName "bob" -tf_jsonStr '{"bob":10}' -tf_hashType "sha256"
-# python3 syncAPI.py --loadDict -tf_slvl 1 -tf_tempFolder $tempFolder -tf_fileName "bob" -tf_hashType "sha256" -tf_filehash $fileHash
+# $fileHash = python3 gamehubAPI.py --saveDict -tf_slvl 1 -tempFolder $tP -tf_fileName "bob" -tf_jsonStr '{"bob":10}' -tf_hashType "sha256"
+# python3 gamehubAPI.py --loadDict -tf_slvl 1 -tf_tempFolder $tempFolder -tf_fileName "bob" -tf_hashType "sha256" -tf_filehash $fileHash
 ## SecurityLevel 2:
-# python3 syncAPI.py --saveDict -tf_slvl 3 -tf_tempFolder $tempFolder -tf_fileName "bob" -tf_jsonStr '{"bob":10}' -tf_encType "aes" -tf_encKey "secret"
-# python3 syncAPI.py --loadDict -tf_slvl 3 -tf_tempFolder $tempFolder -tf_fileName "bob" -tf_encType "aes" -tf_encKey "secret"
+# python3 gamehubAPI.py --saveDict -tf_slvl 3 -tf_tempFolder $tempFolder -tf_fileName "bob" -tf_jsonStr '{"bob":10}' -tf_encType "aes" -tf_encKey "secret"
+# python3 gamehubAPI.py --loadDict -tf_slvl 3 -tf_tempFolder $tempFolder -tf_fileName "bob" -tf_encType "aes" -tf_encKey "secret"
 ## SecurityLevel 3:
-# $fileHash = python3 syncAPI.py --saveDict -slvl 3 -tempFolder $tempFolder -tf_fileName "bob" -tf_jsonStr '{"bob":10}' -tf_encType "aes" -tf_encKey "secret" -tf_hashType "sha256"
-# python3 syncAPI.py --loadDict -tf_slvl 3 -tf_tempFolder $tempFolder -tf_fileName "bob" -tf_encType "aes" -tf_encKey "secret" -tf_hashType "sha256" -tf_filehash $fileHash
+# $fileHash = python3 gamehubAPI.py --saveDict -slvl 3 -tempFolder $tempFolder -tf_fileName "bob" -tf_jsonStr '{"bob":10}' -tf_encType "aes" -tf_encKey "secret" -tf_hashType "sha256"
+# python3 gamehubAPI.py --loadDict -tf_slvl 3 -tf_tempFolder $tempFolder -tf_fileName "bob" -tf_encType "aes" -tf_encKey "secret" -tf_hashType "sha256" -tf_filehash $fileHash
 ## Cleaning up if a problem occurs:
-# python3 syncAPI.py --cleanFolder -tf_tempFolder $tempFolder
+# python3 gamehubAPI.py --cleanFolder -tf_tempFolder $tempFolder
 
 # Examples of managerAPI:
 ## Register/Unregister

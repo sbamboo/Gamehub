@@ -4,7 +4,7 @@
 #
 
 # [Imports]
-import json,os,platform,sys,importlib,argparse
+import json,os,platform,sys,importlib.util,argparse
 
 # [Importa function]
 def fromPath(path):
@@ -56,12 +56,12 @@ setConTitle("Gamehub SaveService")
 setConSize(60, 15)
 
 # [Setup]
-fs = fromPath("..\\libs\\libfilesys.py")
-sc = fromPath("..\\gamehubAPI.py")
+parent = os.path.dirname(__file__)
+_fs = fromPath(f"{parent}\\..\\libs\\libfilesys.py")
+fs = _fs.filesys
+sc = fromPath(f"{parent}\\..\\gamehubAPI.py")
 scoreboard = sc.scoreboardConnector()
-exitFile = os.path.join(os.path.dirname(__file__),"exit.state")
-_lastScore = 0
-_user = ""
+exitFile = os.path.join(parent,"exit.state")
 
 # [Listener]
 print(f"\033[33m[SaveService] \033[90mStarted listener in {args.dataFile}\033[0m")
