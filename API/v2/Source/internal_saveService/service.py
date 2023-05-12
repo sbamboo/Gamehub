@@ -4,7 +4,14 @@
 #
 
 # [Imports]
-import json,os,platform,sys
+import json,os,platform,sys,importlib,argparse
+
+# [Importa function]
+def fromPath(path):
+    spec = importlib.util.spec_from_file_location("module", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 # [Arguments]
 parser = argparse.ArgumentParser(prog="GamehubAPI_tempFiler")
@@ -49,10 +56,10 @@ setConTitle("Gamehub SaveService")
 setConSize(60, 15)
 
 # [Setup]
-from libs.libfilesys import filesys as fs
-from gamehubAPI import scoreboardConnector
-scoreboard = scoreboardConnector()
-exitFile = os.path.join(os.path.dirname(__file__),"saveService_end.state")
+fs = fromPath("..\\libs\\libfilesys.py")
+sc = fromPath("..\\gamehubAPI.py")
+scoreboard = sc.scoreboardConnector()
+exitFile = os.path.join(os.path.dirname(__file__),"exit.state")
 _lastScore = 0
 _user = ""
 
@@ -72,5 +79,5 @@ while True:
         user = scoreData["user"]
         oldScore = scoreboard.get(args.scoreboard)[user]["score"]
         if int(newScore) > int(oldScore):
-            scoreboard.append(args.scoreboard,{user:data})
+            scoreboard.append(args.scoreboard,{user:scoreData["data"]})
             print(f"\033[33m[SaveService] \033[90mWrote new score '{newScore}' for user '{user}'\033[0m")
