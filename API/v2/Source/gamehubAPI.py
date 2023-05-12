@@ -213,7 +213,7 @@ class scoreboardConnector():
         elif encryptionType == "aes":
             import libs.libcrypto.aes as encryptor
         self.needKey = False
-        if encryptionType != "None":
+        if encryptionType != "None" and encryptionType != None:
             self.GenerateKey = encryptor.GenerateKey
             self.encdec = encryptor.encdec
             self.encdec_dict = encryptor.encdec_dict
@@ -267,17 +267,17 @@ def gamehub_getTOS(net=bool()):
 # Main function for handling a scoreboard from a function
 def gamehub_scoreboardFunc(
         encType=None,manager=None,apiKey=None,encKey=None,managerFile=None,ignoreManFormat=None,
-        scoreboard=str(),jsonData=str(),
+        _scoreboard=str(),jsonData=str(),
         create=False,remove=False,get=False,append=False, doesExist=False
     ):
     # Create scoreboardConnector
     scoreboard = scoreboardConnector(encryptionType=encType, storageType=manager, key=apiKey, kryptographyKey=encKey, managersFile=managerFile, ignoreManagerFormat=ignoreManFormat)
     # Actions
-    if create == True: scoreboard.create(scoreboard=scoreboard,jsonDict=jsonData)
-    elif remove == True: scoreboard.remove(scoreboard=scoreboard)
-    elif get == True: scoreboard.get(scoreboard=scoreboard)
-    elif append == True: scoreboard.append(scoreboard=scoreboard,jsonDict=jsonData)
-    elif doesExist == True: scoreboard.doesExist(scoreboard=scoreboard)
+    if create == True: return scoreboard.create(scoreboard=_scoreboard,jsonDict=jsonData)
+    elif remove == True: return scoreboard.remove(scoreboard=_scoreboard)
+    elif get == True: return scoreboard.get(scoreboard=_scoreboard)
+    elif append == True: return scoreboard.append(scoreboard=_scoreboard,jsonDict=jsonData)
+    elif doesExist == True: return scoreboard.doesExist(scoreboard=_scoreboard)
 
 # ========================================================[CLI Executor]========================================================
 if __name__ == '__main__':
@@ -317,7 +317,7 @@ if __name__ == '__main__':
     parser.add_argument('-tf_filehash', dest="tf_fileHash", help="tempfileAPI: The hash of the tile, to match to. |ONLY FOR 'loadDict'| (str)")
     parser.add_argument('-tf_jsonStr', dest="tf_jsonStr", help="tempfileAPI: The content to save to the file in json form. |ONLY FOR 'saveDict'| (str)")
     ## [mainAPI]
-    parser.add_argument('--m_net', dest='m_net', help="mainAPI: getTos from internet of local.")
+    parser.add_argument('--m_net', dest='m_net', help="mainAPI: getTos from internet of local.", action='store_true')
     parser.add_argument('-m_encType', dest='m_encType', help="mainAPI: encryption type (str)")
     parser.add_argument('-m_encKey', dest='m_encKey', help="mainAPI: encryption key (str)")
     parser.add_argument('-m_manager', dest='m_manager', help="mainAPI: manager to use (str)")
@@ -326,11 +326,11 @@ if __name__ == '__main__':
     parser.add_argument('--m_ignoreManFormat', dest='m_ignoreManFormat', help="mainAPI: ignoreManFormat.", action="store_true")
     parser.add_argument('-m_scoreboard', dest='m_scoreboard', help="mainAPI: scoreboard to use (str)")
     parser.add_argument('-m_jsonData', dest='m_jsonData', help="mainAPI: json data to send (str)")
-    parser.add_argument('--m_create', dest='m_create', help="mainAPI: Creates a scoreboard.")
-    parser.add_argument('--m_remove', dest='m_remove', help="mainAPI: Remove a scoreboard.")
-    parser.add_argument('--m_get', dest='m_get', help="mainAPI: Gets a scoreboard.")
-    parser.add_argument('--m_append', dest='m_append', help="mainAPI: Appends data to a scoreboard.")
-    parser.add_argument('--m_doesExist', dest='m_doesExist', help="mainAPI: Checks if a scoreboard exists.")
+    parser.add_argument('--m_create', dest='m_create', help="mainAPI: Creates a scoreboard.", action='store_true')
+    parser.add_argument('--m_remove', dest='m_remove', help="mainAPI: Remove a scoreboard.", action='store_true')
+    parser.add_argument('--m_get', dest='m_get', help="mainAPI: Gets a scoreboard.", action='store_true')
+    parser.add_argument('--m_append', dest='m_append', help="mainAPI: Appends data to a scoreboard.", action='store_true')
+    parser.add_argument('--m_doesExist', dest='m_doesExist', help="mainAPI: Checks if a scoreboard exists.", action='store_true')
     ## [General]
     parser.add_argument('autoComsume', nargs='*', help="AutoConsume")
     # Get Inputs
@@ -372,8 +372,8 @@ if __name__ == '__main__':
     if args.getTOS == True:
         out = gamehub_getTOS(net=args.m_net)
         print(out)
-    if args.rq_verFileOverwrite == True:
-        out = gamehub_scoreboardFunc(encType=args.m_encType,manager=args.m_manager,apiKey=args.m_apiKey,encKey=args.m_encKey,managerFile=args.m_managerFile,ignoreManFormat=args.m_ignoreManFormat,scoreboard=args.m_scoreboard,jsonData=args.m_jsonData,create=args.m_create,remove=args.m_remove,get=args.m_get,append=args.m_append,doesExist=args.m_doesExist)
+    if args.asFunction == True:
+        out = gamehub_scoreboardFunc(encType=args.m_encType,manager=args.m_manager,apiKey=args.m_apiKey,encKey=args.m_encKey,managerFile=args.m_managerFile,ignoreManFormat=args.m_ignoreManFormat,_scoreboard=args.m_scoreboard,jsonData=args.m_jsonData,create=args.m_create,remove=args.m_remove,get=args.m_get,append=args.m_append,doesExist=args.m_doesExist)
         print(out)
 
 # Info
