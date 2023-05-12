@@ -1,4 +1,4 @@
-import json,os,uuid,tempfile,argparse
+import json,os,uuid,tempfile,argparse,sys
 from libs.importa import fromPath
 from libs.libhasher import hashFile,hashString
 from libs.libfilesys import filesys as fs
@@ -306,15 +306,19 @@ if __name__ == '__main__':
     parser.add_argument('-tf_jsonStr', dest="tf_jsonStr", help="tempfileAPI: The content to save to the file in json form. |ONLY FOR 'saveDict'| (str)")
     ## [mainAPI]
     parser.add_argument('--m_net', dest='m_net', help="mainAPI: getTos from internet of local.")
-    # jsonData=str(),create=False,remove=False,get=False,append=False, doesExist=False
     parser.add_argument('-m_encType', dest='m_encType', help="mainAPI: encryption type (str)")
     parser.add_argument('-m_encKey', dest='m_encKey', help="mainAPI: encryption key (str)")
     parser.add_argument('-m_manager', dest='m_manager', help="mainAPI: manager to use (str)")
     parser.add_argument('-m_apiKey', dest='m_apiKey', help="mainAPI: api key(str)")
     parser.add_argument('-m_managerFile', dest='m_managerFile', help="mainAPI: path to managerFile (str)")
-    parser.add_argument('--m_ignoreManFormat', dest='m_ignoreManFormat', help="mainAPI: ignoreManFormat.")
+    parser.add_argument('--m_ignoreManFormat', dest='m_ignoreManFormat', help="mainAPI: ignoreManFormat.", action="store_true")
     parser.add_argument('-m_scoreboard', dest='m_scoreboard', help="mainAPI: scoreboard to use (str)")
-    parser.add_argument('-m_scoreboard', dest='m_scoreboard', help="mainAPI: scoreboard to use (str)")
+    parser.add_argument('-m_jsonData', dest='m_jsonData', help="mainAPI: json data to send (str)")
+    parser.add_argument('--m_create', dest='m_create', help="mainAPI: Creates a scoreboard.")
+    parser.add_argument('--m_remove', dest='m_remove', help="mainAPI: Remove a scoreboard.")
+    parser.add_argument('--m_get', dest='m_get', help="mainAPI: Gets a scoreboard.")
+    parser.add_argument('--m_append', dest='m_append', help="mainAPI: Appends data to a scoreboard.")
+    parser.add_argument('--m_doesExist', dest='m_doesExist', help="mainAPI: Checks if a scoreboard exists.")
     ## [General]
     parser.add_argument('autoComsume', nargs='*', help="AutoConsume")
     # Get Inputs
