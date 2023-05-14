@@ -1,4 +1,4 @@
-from ....Source.gamehubAPI import scoreboardConnector
+from gamehubAPI import scoreboardConnector
 
 # Initializing a scoreboard connector with the storagetype being pantry (BuiltInPantryManager) and supply our pantryKey
 # In this example we haven't encrypted our pantryKey, which is a requirement if you want to share your software using GamehubAPI,
