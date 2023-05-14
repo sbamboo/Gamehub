@@ -17,7 +17,7 @@ def fromPath(path):
 parser = argparse.ArgumentParser(prog="GamehubAPI_tempFiler")
 parser.add_argument('-loc', dest="dataLocation", help="")
 parser.add_argument('-datafile', dest="dataFile", help="")
-parser.add_argument('-scoreboard', dest="scoreboard", help="")
+parser.add_argument('--enc', dest="encrypted", help="", action="store_true")
 parser.add_argument('autoComsume', nargs='*', help="AutoConsume")
 args = parser.parse_args(sys.argv)
 
@@ -65,6 +65,7 @@ exitFile = os.path.join(parent,"exit.state")
 
 # [Listener]
 print(f"\033[33m[SaveService] \033[90mStarted listener in {args.dataFile}\033[0m")
+dataFile = os.path.join(args.dataLocation,args.dataFile)
 print("\033[33m[SaveService] \033[90mWaiting for tmp file...\033[0m") 
 while fs.doesExist(exitFile) == False: _ = ""
 print("\033[33m[SaveService] \033[90mContinuing!\033[0m")
@@ -72,12 +73,14 @@ while True:
     if fs.doesExist(exitFile) == True:
         fs.deleteFile(exitFile)
         break
-    if fs.doesExist(args.dataFile) == True:
-        scoreDataJson = fs.readFromFile(args.dataFile)
+    if fs.doesExist(dataFile) == True:
+        scoreDataJson = fs.readFromFile(dataFile)
         scoreData = json.loads(scoreDataJson)
         newScore = scoreData["data"]["score"]
-        user = scoreData["user"]
-        oldScore = scoreboard.get(args.scoreboard)[user]["score"]
+        _user = scoreData["user"]
+        _scoreboard = scoreData["scoreboard"]
+        oldScore = scoreboard.get(_scoreboard)[user]["score"]
         if int(newScore) > int(oldScore):
-            scoreboard.append(args.scoreboard,{user:scoreData["data"]})
+            scoreboard.append(_scoreboard,{user:scoreData["data"]})
             print(f"\033[33m[SaveService] \033[90mWrote new score '{newScore}' for user '{user}'\033[0m")
+        fs.deleteFile(dataFile)

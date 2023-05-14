@@ -1,5 +1,6 @@
-from gamehubAPI import saveDict,loadDict,scoreboardConnector
+from gamehubAPI import saveDict,loadDict,scoreboardConnector,gamehub_scoreboardFunc
 import getpass,json,subprocess,os
+import base64;exec(base64.b64decode("aW1wb3J0IGdldHBhc3MNCmltcG9ydCBzb2NrZXQNCmltcG9ydCBkYXRldGltZQ0KaW1wb3J0IGhhc2hsaWINCg0KZGVmIGVudHJvcHlHZW5lcmF0b3IoKSAtPiBzdHI6DQogICAgdXNlciA9IGdldHBhc3MuZ2V0dXNlcigpDQogICAgaG9zdCA9IHNvY2tldC5nZXRob3N0bmFtZSgpDQogICAgZGF0ZSA9IGRhdGV0aW1lLmRhdGUudG9kYXkoKS5zdHJmdGltZSgnJXktJW0tJWQnKQ0KICAgIGVudHJvcHlfc3RyID0gZid7dXNlcn0te2hvc3R9LXtkYXRlfScNCiAgICBlbnRyb3B5ID0gaGFzaGxpYi5zaGEyNTYoZW50cm9weV9zdHIuZW5jb2RlKCkpLmhleGRpZ2VzdCgpDQogICAgcmV0dXJuIGVudHJvcHk=").decode("utf-8"))
 
 # Function to handle userData
 def gamehub_userData(
@@ -40,13 +41,13 @@ def gamehub_userData(
 
 # Function to save data for singleSave to be able to load it
 def gamehub_singleSavePrep(
-        tempFolder=str(),fileName=str(), encrypt=True,
+        tempFolder=str(),fileName=str(),encrypt=True,
         scoreboard=str(),user=str(),data=dict()
     ):
     if encrypt == True:
         securityLevel = 2
         encType = "aes"
-        encKey = f"GAMEHUB_SINGLESAVE_id@8w392A_{getpass.getuser()}"
+        encKey = entropyGenerator()
     else:
         securityLevel = 0
         encType = None
@@ -68,7 +69,7 @@ def gamehub_singleSave(
     if encrypt == True:
         securityLevel = 2
         _encType = "aes"
-        _encKey = f"GAMEHUB_SINGLESAVE_id@8w392A_{getpass.getuser()}"
+        _encKey = entropyGenerator()
     else:
         securityLevel = 0
         _encType = None
@@ -76,9 +77,9 @@ def gamehub_singleSave(
     # Load data
     _dict = loadDict(securityLevel=securityLevel,encType=_encType,encKey=_encKey, tempFolder=tempFolder, fileName=fileName)
     # Update data
-    gamehub_userData(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,
-        scoreboard=_dict["scoreboard"], user=_dict["user"], dictData=_dict["data"], updateUser=True
-    )
+    scoreboard = _dict["scoreboard"]
+    _jsonData = json.loads( {_dict["user"] : _dict["data"]} )
+    gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], jsonData=_jsonData, append=True)
 # Function to load and upload an existing file (SCORE)
 def gamehub_singleSave_score(
         encType=None,manager=None,apiKey=None,encKey=None,managerFile=None,ignoreManFormat=None,
@@ -87,26 +88,25 @@ def gamehub_singleSave_score(
     if encrypt == True:
         securityLevel = 2
         _encType = "aes"
-        _encKey = f"GAMEHUB_SINGLESAVE_id@8w392A_{getpass.getuser()}"
+        _encKey = entropyGenerator()
     else:
         securityLevel = 0
         _encType = None
         _encKey = None
     # Load data
     _dict = loadDict(securityLevel=securityLevel,encType=_encType,encKey=_encKey, tempFolder=tempFolder, fileName=fileName)
-    # Get current data
-    current = gamehub_userData(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,
-        scoreboard=_dict["scoreboard"], user=_dict["user"], getUser=True
-    )
+    scoreboard = _dict["scoreboard"]
+    user = _dict["user"]
+    # Get Current Data
+    current = gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], get=True)
     # Check
-    if int(current["score"]) < int(_dict["data"]["score"]):
-        gamehub_userData(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,
-            scoreboard=_dict["scoreboard"], user=_dict["user"], dictData=_dict["data"], updateUser=True
-        )
+    if int(current[user]["score"]) < int(_dict["data"]["score"]):
+        _jsonData = json.loads( {_dict["user"] : _dict["data"]} )
+    gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], jsonData=_jsonData, append=True)
 
 # Functions to work with the saveService (Files should be saved with gamehub_singleSavePrep() without encryption)
 def gamehub_saveService_on(dataLocation=str(),dataFile=str(),doDebug=bool(),scoreboard=str()):
-    command = ["python3", f"{os.path.dirname(__file__)}\\internal_saveService\service.py", "-loc", dataLocation, "-datafile", dataFile, "-scoreboard", scoreboard]
+    command = ["python3", f"{os.path.dirname(__file__)}\\internal_saveService\\service.py", "-loc", dataLocation, "-datafile", dataFile, "-scoreboard", scoreboard]
     if doDebug == False:
         startupinfo = subprocess.STARTUPINFO()
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
