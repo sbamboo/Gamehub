@@ -14,15 +14,17 @@ def fromPath(path):
     return module
 
 # [Arguments]
-parser = argparse.ArgumentParser(prog="GamehubAPI_tempFiler")
-parser.add_argument('-apiConfpath', dest="apiConfpath", help="Path to the api.conf file, containing info on how to access the API.")
-parser.add_argument('-linkedFile', dest="linkedFile", help="Boolean flag, set to False to disable decrypting on the linked file, note! this has to be disabled in the saver aswell.", action="store_true")
-parser.add_argument('-exitFile', dest="exitFile", help="Path to the exit.empty file, if this one is found the listener will stop.")
-parser.add_argument('--doEncrypt', dest="doEncrypt", help="Boolean flag, set to False to disable decrypting on the linked file, note! this has to be disabled in the saver aswell.", action="store_true")
-parser.add_argument('--verbose', dest="verbose", help="Boolean flag, set to False to disable the function writing out what it is doing.", action="store_true")
-parser.add_argument('--simpleScore', dest="simpleScore", help="Boolean flag, if set to True the function will handle scores (Only update if newer) Data must be {'score':<intValue>}", action="store_true")
-parser.add_argument('autoComsume', nargs='*', help="AutoConsume")
-args = parser.parse_args(sys.argv)
+def parse_arguments(args):
+    parsed_args = {'apiConf': None, 'linkedFile': None, 'exitFile': None, 'doEncrypt': False, 'verbose': False, 'simpleScore': False}
+    for index,arg in enumerate(args):
+        if arg == "-apiConfpath":  parsed_args["apiConf"] = args[index+1]
+        elif arg == "-linkedFile":  parsed_args["linkedFile"] = args[index+1]
+        elif arg == "-exitFile":  parsed_args["exitFile"] = args[index+1]
+        elif arg == "--doEncrypt":  parsed_args["doEncrypt"] = True
+        elif arg == "--verbose":  parsed_args["verbose"] = True
+        elif arg == "--simpleScore":  parsed_args["simpleScore"] = True
+    return parsed_args
+args = parse_arguments(sys.argv)
 
 # [Window] - Functions from conUtils by Simon Kalmi Claesson
 def setConTitle(title):
@@ -64,4 +66,4 @@ fs = _fs.filesys
 qu = fromPath(f"{parent}\\..\\quickuseAPI.py")
 
 # [Listener]
-qu.saveServiceFunction(apiConfPath=args.apiConfPath,linkedFile=args.linkedFile,exitFile=args.exitFile,doEncrypt=args.doEncrypt,verbose=args.verbose,simpleScore=args.simpleScore)
+qu.saveServiceFunction(apiConfPath=args["apiConf"],linkedFile=args["linkedFile"],exitFile=args["exitFile"],doEncrypt=args["doEncrypt"],verbose=args["verbose"],simpleScore=args["simpleScore"])

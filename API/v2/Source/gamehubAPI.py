@@ -114,9 +114,13 @@ def cleanFolder(tempFolder=str()):
 def saveDict(securityLevel=int(),encType=None,encKey=None,hashType=None, tempFolder=str(), fileName=str(), jsonStr=str()) -> str:
     # Import encryption lib
     if encType == "legacy":
-        from libs.libcrypto.legacy import encdec,GenerateKey
+        crypto = fromPath(f"{parentPath}\\libs\\libcrypto\\legacy.py")
+        encdec = crypto.encdec
+        GenerateKey = crypto.GenerateKey
     elif encType == "aes":
-        from libs.libcrypto.aes import encdec,GenerateKey
+        crypto = fromPath(f"{parentPath}\\libs\\libcrypto\\aes.py")
+        encdec = crypto.encdec
+        GenerateKey = crypto.GenerateKey
     # Get secure fileName
     fileId = hashString(message=fileName, hashType="sha256")
     toSave = jsonStr
@@ -141,9 +145,13 @@ def saveDict(securityLevel=int(),encType=None,encKey=None,hashType=None, tempFol
 def loadDict(securityLevel=int(),encType=None,encKey=None,hashType=None, tempFolder=str(), fileName=str(), filehash=None) -> dict:
     # Import encryption lib
     if encType == "legacy":
-        from libs.libcrypto.legacy import encdec,GenerateKey
+        crypto = fromPath(f"{parentPath}\\libs\\libcrypto\\legacy.py")
+        encdec = crypto.encdec
+        GenerateKey = crypto.GenerateKey
     elif encType == "aes":
-        from libs.libcrypto.aes import encdec,GenerateKey
+        crypto = fromPath(f"{parentPath}\\libs\\libcrypto\\aes.py")
+        encdec = crypto.encdec
+        GenerateKey = crypto.GenerateKey
     # encrypt
     isEnc = False
     if int(securityLevel) == 2 or int(securityLevel) == 3:
@@ -209,9 +217,9 @@ class scoreboardConnector():
         # CryptoType
         if encryptionType == None: encryptionType = "None"
         if encryptionType == "legacy":
-            import libs.libcrypto.legacy as encryptor
+            encryptor = fromPath(f"{parentPath}\\libs\\libcrypto\\legacy.py")
         elif encryptionType == "aes":
-            import libs.libcrypto.aes as encryptor
+            encryptor = fromPath(f"{parentPath}\\libs\\libcrypto\\aes.py")
         self.needKey = False
         if encryptionType != "None" and encryptionType != None:
             self.GenerateKey = encryptor.GenerateKey
@@ -337,7 +345,7 @@ if __name__ == '__main__':
     args = parser.parse_args(sys.argv)
     # [requireAPI]
     if args.requireAPI == True:
-        out = requireAPI(apiVid=args.m_apiVid,verFileOverwrite=args.m_verFileOverwrite)
+        out = requireAPI(apiVid=args.rq_apiVid,verFileOverwrite=args.rq_verFileOverwrite)
         print(out)
     # [managerAPI]
     if args.registerManager == True:
