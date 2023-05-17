@@ -15,9 +15,12 @@ def fromPath(path):
 
 # [Arguments]
 parser = argparse.ArgumentParser(prog="GamehubAPI_tempFiler")
-parser.add_argument('-loc', dest="dataLocation", help="")
-parser.add_argument('-datafile', dest="dataFile", help="")
-parser.add_argument('--enc', dest="encrypted", help="", action="store_true")
+parser.add_argument('-apiConfpath', dest="apiConfpath", help="Path to the api.conf file, containing info on how to access the API.")
+parser.add_argument('-linkedFile', dest="linkedFile", help="Boolean flag, set to False to disable decrypting on the linked file, note! this has to be disabled in the saver aswell.", action="store_true")
+parser.add_argument('-exitFile', dest="exitFile", help="Path to the exit.empty file, if this one is found the listener will stop.")
+parser.add_argument('--doEncrypt', dest="doEncrypt", help="Boolean flag, set to False to disable decrypting on the linked file, note! this has to be disabled in the saver aswell.", action="store_true")
+parser.add_argument('--verbose', dest="verbose", help="Boolean flag, set to False to disable the function writing out what it is doing.", action="store_true")
+parser.add_argument('--simpleScore', dest="simpleScore", help="Boolean flag, if set to True the function will handle scores (Only update if newer) Data must be {'score':<intValue>}", action="store_true")
 parser.add_argument('autoComsume', nargs='*', help="AutoConsume")
 args = parser.parse_args(sys.argv)
 
@@ -54,33 +57,11 @@ def setConSize(width,height):
         return f"\033[31mError: Platform {platformv} not supported yet!\033[0m"
 setConTitle("Gamehub SaveService")
 setConSize(60, 15)
-
 # [Setup]
 parent = os.path.dirname(__file__)
 _fs = fromPath(f"{parent}\\..\\libs\\libfilesys.py")
 fs = _fs.filesys
-sc = fromPath(f"{parent}\\..\\gamehubAPI.py")
-scoreboard = sc.scoreboardConnector()
-exitFile = os.path.join(parent,"exit.state")
+qu = fromPath(f"{parent}\\..\\quickuseAPI.py")
 
 # [Listener]
-print(f"\033[33m[SaveService] \033[90mStarted listener in {args.dataFile}\033[0m")
-dataFile = os.path.join(args.dataLocation,args.dataFile)
-print("\033[33m[SaveService] \033[90mWaiting for tmp file...\033[0m") 
-while fs.doesExist(exitFile) == False: _ = ""
-print("\033[33m[SaveService] \033[90mContinuing!\033[0m")
-while True:
-    if fs.doesExist(exitFile) == True:
-        fs.deleteFile(exitFile)
-        break
-    if fs.doesExist(dataFile) == True:
-        scoreDataJson = fs.readFromFile(dataFile)
-        scoreData = json.loads(scoreDataJson)
-        newScore = scoreData["data"]["score"]
-        _user = scoreData["user"]
-        _scoreboard = scoreData["scoreboard"]
-        oldScore = scoreboard.get(_scoreboard)[user]["score"]
-        if int(newScore) > int(oldScore):
-            scoreboard.append(_scoreboard,{user:scoreData["data"]})
-            print(f"\033[33m[SaveService] \033[90mWrote new score '{newScore}' for user '{user}'\033[0m")
-        fs.deleteFile(dataFile)
+qu.saveServiceFunction(apiConfPath=args.apiConfPath,linkedFile=args.linkedFile,exitFile=args.exitFile,doEncrypt=args.doEncrypt,verbose=args.verbose,simpleScore=args.simpleScore)
