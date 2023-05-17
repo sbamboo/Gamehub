@@ -1,11 +1,20 @@
 managerFormat = [1, "https://sbamboo.github.io/websa/Gamehub/API/v2/docs/managers/format1.html"]
 
+
+import importlib.util
+def fromPath(path):
+    spec = importlib.util.spec_from_file_location("module", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
 class Manager():
     def __init__(self):
-        import json
+        import json,os
         self.json = json
-        from libs.libpantryapi import pantryapi
-        self.api = pantryapi
+        parentDir = os.path.dirname(__file__)
+        pantryapi = fromPath(f"{parentDir}\\..\\libs\\libpantryapi.py")
+        self.api = pantryapi.pantryapi
     # Function to sendback answers as dictionary
     def safeCast(self,*args):
         _object = args[0]
