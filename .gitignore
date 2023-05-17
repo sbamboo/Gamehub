@@ -1,3 +1,3 @@
 *.pyc
-.\API\v2\envir\*
+.\API\v2\envir
 .\API\v2\Source\toolsets\APIkeyConfigurator_win64x\source\APIkeyConfigurator.py
