@@ -225,7 +225,7 @@ def saveServiceFunction(apiConfPath=str(),linkedFile=str(),exitFile=str(),doEncr
                 if verbose: print(f"\033[33m[SaveService] \033[90mUpdated data for user '{user}'\033[0m")
                 
 # Functions to work with the saveService (Files should be saved with saveServicePrep() with encryption by default)
-def gamehub_saveService_on(apiConfPath=str(),linkedFile=str(),exitFile=str(),doEncrypt=True,verbose=True,simpleScore=False):
+def gamehub_saveService_on(pyPath="python3",apiConfPath=str(),linkedFile=str(),exitFile=str(),doEncrypt=True,verbose=True,simpleScore=False):
     # General setup of enviroment
     if os.path.exists(exitFile): os.remove(exitFile)
     # Setup base command
@@ -241,7 +241,7 @@ def gamehub_saveService_on(apiConfPath=str(),linkedFile=str(),exitFile=str(),doE
         creation_flags = subprocess.CREATE_NEW_CONSOLE
     else: raise NotImplementedError(f'Unsupported operating system: {current_os}')
     # Setup command
-    command2 = ["python3", f"{os.path.dirname(__file__)}\\internal_saveService\\service.py", "-apiConfpath", apiConfPath, "-linkedFile", linkedFile, "-exitFile", exitFile]
+    command2 = [pyPath, f"{os.path.dirname(__file__)}\\internal_saveService\\service.py", "-apiConfpath", apiConfPath, "-linkedFile", linkedFile, "-exitFile", exitFile]
     if current_os == 'Darwin': command2.pop(0)
     for e in command2: command.append(e)
     if doEncrypt == True: command.append("--doEncrypt")
@@ -315,6 +315,7 @@ if __name__ == '__main__':
     parser.add_argument('-ss_scoreboard', dest="ss_scoreboard", help="SaveService: Scoreboard to save to (str)")
     parser.add_argument('-ss_user', dest="ss_user", help="SaveService: User to save to (str)")
     parser.add_argument('-ss_data', dest="ss_data", help="SaveService: Data to save to user specified (JSON)")
+    parser.add_argument('-ss_pyPath', dest="ss_pyPath", help="SaveService: PythonPathOverwrite (str)")
     ## [Internal]
     parser.add_argument('-it_inp', dest="it_inp", help="Internal: Input (str)")
     parser.add_argument('-it_linkedFile', dest="it_linkedFile", help="Internal: Linked file (str)")
@@ -324,38 +325,51 @@ if __name__ == '__main__':
     args = parser.parse_args(sys.argv)
     # [QuickuseFunctions]
     if args.qu_userData:
-        return gamehub_userData(
+        ans =  gamehub_userData(
             encType=args.qu_encType,manager=args.qu_manager,apiKey=args.qu_apiKey,encKey=args.qu_encKey,managerFile=args.qu_managerFile,ignoreManFormat=args.qu_ignoreManFormat,
             scoreboard=args.qu_scoreboard,user=args.qu_user,dictData=json.loads(args.qu_dictData),
             saveUser=args.qu_saveUser,getUser=args.qu_getUser,updateUser=args.qu_updateUser,getAllUsers=args.qu_getAllUsers, doesExist=args.qu_doesExist,mRemove=args.qu_mRemoves
         )
+        print(ans)
     if args.qu_prep:
-        return gamehub_singleSavePrep( tempFolder=args.qu_tempFolder,fileName=args.qu_fileName,encrypt=args.qu_encrypt,scoreboard=args.qu_scoreboard,user=args.qu_user,data=json.loads(args.qu_dictData) )
+        ans =  gamehub_singleSavePrep( tempFolder=args.qu_tempFolder,fileName=args.qu_fileName,encrypt=args.qu_encrypt,scoreboard=args.qu_scoreboard,user=args.qu_user,data=json.loads(args.qu_dictData) )
     if args.qu_save:
-        return gamehub_singleSave(
+        ans =  gamehub_singleSave(
         encType=args.qu_encType,manager=args.qu_manager,apiKey=args.qu_apiKey,encKey=args.qu_encKey,managerFile=args.qu_managerFile,ignoreManFormat=args.qu_ignoreManFormat,
         tempFolder=args.qu_tempFolder,fileName=args.qu_fileName, encrypt=args.qu_encrypt
-    )
+        )
+        print(ans)
     if args.qu_savescore:
-        return gamehub_singleSave_score(
+        ans =  gamehub_singleSave_score(
         encType=args.qu_encType,manager=args.qu_manager,apiKey=args.qu_apiKey,encKey=args.qu_encKey,managerFile=args.qu_managerFile,ignoreManFormat=args.qu_ignoreManFormat,
         tempFolder=args.qu_tempFolder,fileName=args.qu_fileName, encrypt=args.qu_encrypt
-    )
+        )
+        print(ans)
     if args.qu_apiconfFunc:
-        return apiConfig_gamehub_scoreboardFunc(apiConfPath=args.qu_apiConfPath,scoreboard=args.qu_scoreboard,jsonData=args.qu_dictData, create=args.qu_create,remove=args.qu_remove,get=args.qu_get,append=args.qu_append, doesExist=args.qu_doesExist)
+        ans =  apiConfig_gamehub_scoreboardFunc(apiConfPath=args.qu_apiConfPath,scoreboard=args.qu_scoreboard,jsonData=args.qu_dictData, create=args.qu_create,remove=args.qu_remove,get=args.qu_get,append=args.qu_append, doesExist=args.qu_doesExist)
+        print(ans)
     ## [SaveService]
     if args.ss_function:
-        return saveServiceFunction(apiConfPath=args.ss_apiConfPath,linkedFile=args.ss_linkedFile,exitFile=args.ss_exitFile,doEncrypt=args.ss_doEncrypt,verbose=args.ss_verbose,simpleScore=args.ss_simpleScore)
+        ans =  saveServiceFunction(apiConfPath=args.ss_apiConfPath,linkedFile=args.ss_linkedFile,exitFile=args.ss_exitFile,doEncrypt=args.ss_doEncrypt,verbose=args.ss_verbose,simpleScore=args.ss_simpleScore)
+        print(ans)
     if args.ss_prep:
-        return saveServicePrep(linkedFile=args.ss_linkedFile,doEncrypt=args.ss_doEncrypt,scoreboard=args.ss_scoreboard,user=args.ss_user,data=json.loads(args.ss_data))
+        ans =  saveServicePrep(linkedFile=args.ss_linkedFile,doEncrypt=args.ss_doEncrypt,scoreboard=args.ss_scoreboard,user=args.ss_user,data=json.loads(args.ss_data))
+        print(ans)
     if args.ss_on:
-        return gamehub_saveService_on(apiConfPath=args.ss_apiConfPath,linkedFile=args.ss_linkedFile,exitFile=args.ss_exitFile,doEncrypt=args.ss_doEncrypt,verbose=args.ss_verbose,simpleScore=args.ss_simpleScore)
+        pyPath = "python3"
+        if args.ss_pyPath: pypath = args.ss_pyPath
+        ans =  gamehub_saveService_on(ss_pyPath=pyPath,apiConfPath=args.ss_apiConfPath,linkedFile=args.ss_linkedFile,exitFile=args.ss_exitFile,doEncrypt=args.ss_doEncrypt,verbose=args.ss_verbose,simpleScore=args.ss_simpleScore)
+        print(ans)
     if args.ss_off:
-        return gamehub_saveService_off(exitFile=args.ss_exitFile)
+        ans =  gamehub_saveService_off(exitFile=args.ss_exitFile)
+        print(ans)
     ## [Internal]
     if args.it_ep:
-        return _ep(it_inp)
+        ans =  _ep(it_inp)
+        print(ans)
     if args.it_linkFexi:
-        return _linkFileExist(it_linkedFile)
+        ans =  _linkFileExist(it_linkedFile)
+        print(ans)
     if args.it_getApiConf:
-        return getAPIConfig(args.it_apiConfPath)
+        ans = getAPIConfig(args.it_apiConfPath)
+        print(ans)
