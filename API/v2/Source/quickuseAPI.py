@@ -145,7 +145,7 @@ class apiConfigScoreboardConnector(gh.scoreboardConnector):
 # wrapper for gamehubAsAFunction
 def apiConfig_gamehub_scoreboardFunc(apiConfPath,scoreboard=str(),jsonData=str(), create=False,remove=False,get=False,append=False, doesExist=False):
     _d = getAPIConfig(apiConfPath)
-    return gh.gamehub_scoreboardFunc(encType=_d["encryptionType"],manager=_d["storageType"],apiKey=_d["apiKey"],encKey=_d["encKey"],managerFile=_d["managersFile"],ignoreManFormat=_d["ignoreManagerFormat"],_scoreboard=scoreboard,_jsonData=jsonData,create=create,remove=remove,get=get,append=append,doesExist=doesExist)
+    return gh.gamehub_scoreboardFunc(encType=_d["encryptionType"],manager=_d["storageType"],apiKey=_d["apiKey"],encKey=_d["encKey"],managerFile=_d["managersFile"],ignoreManFormat=_d["ignoreManagerFormat"],_scoreboard=scoreboard,jsonData=jsonData,create=create,remove=remove,get=get,append=append,doesExist=doesExist)
 
 # Function to prep a file for the saveService
 def saveServicePrep(linkedFile=str(),doEncrypt=True, scoreboard=str(),user=str(),data=dict()):
