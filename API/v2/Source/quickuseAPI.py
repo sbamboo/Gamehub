@@ -304,7 +304,6 @@ if __name__ == '__main__':
     parser.add_argument('--qu_remove', dest="qu_remove", action="store_true", help="QuickuseFuncs: remove method (bool)")
     parser.add_argument('--qu_get', dest="qu_get", action="store_true", help="QuickuseFuncs: get method (bool)")
     parser.add_argument('--qu_append', dest="qu_append", action="store_true", help="QuickuseFuncs: append method (bool)")
-    parser.add_argument('--qu_doesExist', dest="qu_doesExist", action="store_true", help="QuickuseFuncs: doesExist method (bool)")
     ## [SaveService]
     parser.add_argument('-ss_apiConfPath', dest="ss_apiConfPath", help="SaveService: APIconf path (str)")
     parser.add_argument('-ss_linkedFile', dest="ss_linkedFile", help="SaveService: LinkedFile path (str)")
