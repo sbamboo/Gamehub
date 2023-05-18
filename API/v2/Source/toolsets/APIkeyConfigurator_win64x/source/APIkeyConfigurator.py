@@ -33,7 +33,7 @@ encKey = Finput('API-key EncryptionKey (Only if encType is not "None"): ')
 _confFile = input('Done!, Now where should the data be saved ["<path>"]: ')
 
 # GenerateKey
-public_key = "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAugRX/+7b92o8RZq6JWl/\nB0SGYFUyL6S5LBIXs1zKxSnYM7obASrbUIbNlC/C+Clp1GUZd8dSg7RNvV4SqZrB\nEAFVkmTaBR8/jp22804L3hsZoUYphjBXT/pPHLI7cQGdfTw/UQPU/UkwPwXrZMgl\ndWHYoijerIgJCUSB1dsxuGBAbuDgdo96dqEdc6EbaMSp/jKAOUkIGFtaeiTgArH6\nFsR4d1oyNec/OauqQuNXwm6v5JYF0JOiaRc6+eYTBX+wN0BoKAemA7Q/npSpwoTu\noS36LcGYT8ZDKVBSyhzvUYVbYik07pJ5x+WFrngR+kJ+0jNx8VFcw6+jz3NeSviB\npQIDAQAB\n-----END PUBLIC KEY-----\n"
+public_key = "<PUBLIC_KEY>"
 
 # Package to json
 _dict = {"managerFile":managerFile, "storageType":storageType, "ignoreManagerFormat":ignoreManagerFormat, "apiKey":apiKey, "encType":encType, "encKey":encKey}
