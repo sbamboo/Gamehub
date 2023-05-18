@@ -191,7 +191,9 @@ def saveServiceFunction(apiConfPath=str(),linkedFile=str(),exitFile=str(),doEncr
     # Look for first file, as a startup
     if verbose: print(f"\033[33m[SaveService] \033[90mStarted listener on {linkedFile}\033[0m")
     if verbose: print("\033[33m[SaveService] \033[90mWaiting for tmp file...\033[0m")
-    while _linkFileExist(linkedFile) == False: _ = ""
+    while _linkFileExist(linkedFile) == False: 
+        if fs.doesExist(exitFile) == True:
+            break
     # Loop through the file and listen for changes
     if verbose: print("\033[33m[SaveService] \033[90mContinuing!\033[0m")
     while True:
@@ -320,8 +322,10 @@ if __name__ == '__main__':
     parser.add_argument('-it_linkedFile', dest="it_linkedFile", help="Internal: Linked file (str)")
     parser.add_argument('-it_apiConfPath', dest="it_apiConfPath", help="Internal: APIconf path (str)")
     ## [General]
+    parser.add_argument('--autoPath', dest="autopath", help="EXPERIMENTAL, DEBUG PURPOSES", action="store_true")
     # Get Inputs
     args = parser.parse_args(sys.argv)
+    if args.autopath: os.chdir(f"{parentDir}\\..")
     # [QuickuseFunctions]
     if args.qu_userData:
         ans =  gamehub_userData(
@@ -352,7 +356,10 @@ if __name__ == '__main__':
         ans =  saveServiceFunction(apiConfPath=args.ss_apiConfPath,linkedFile=args.ss_linkedFile,exitFile=args.ss_exitFile,doEncrypt=args.ss_doEncrypt,verbose=args.ss_verbose,simpleScore=args.ss_simpleScore)
         print(ans)
     if args.ss_prep:
-        ans =  saveServicePrep(linkedFile=args.ss_linkedFile,doEncrypt=args.ss_doEncrypt,scoreboard=args.ss_scoreboard,user=args.ss_user,data=json.loads(args.ss_data))
+        _str = str(args.ss_data)
+        _str = _str.replace("'",'"')
+        _jsonData = json.loads(_str)
+        ans =  saveServicePrep(linkedFile=args.ss_linkedFile,doEncrypt=args.ss_doEncrypt,scoreboard=args.ss_scoreboard,user=args.ss_user,data=_jsonData)
         print(ans)
     if args.ss_on:
         pyPath = "python3"
