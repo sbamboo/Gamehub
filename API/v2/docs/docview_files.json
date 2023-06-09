@@ -1,7 +1,8 @@
 {
     "Docs": {
         "Managers": {
-             "Format1": "https://sbamboo.github.io/websa/docview/?markdown=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/managers/format1.md&css=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/managers/docs.css&json=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/docview_files.json"
+            "Format1": "https://sbamboo.github.io/websa/docview/?markdown=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/managers/format1.md&css=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/managers/docs.css&json=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/docview_files.json",
+            "Format2": "https://sbamboo.github.io/websa/docview/?markdown=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/managers/format2.md&css=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/managers/docs.css&json=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/docview_files.json"
         }
     }
 }

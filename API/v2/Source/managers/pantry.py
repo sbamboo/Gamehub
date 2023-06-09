@@ -1,4 +1,4 @@
-managerFormat = [1, "https://sbamboo.github.io/websa/Gamehub/API/v2/docs/managers/format1.html"]
+managerFormat = [2, "https://sbamboo.github.io/websa/Gamehub/API/v2/docs/managers/format2.html"]
 
 
 import importlib.util
@@ -33,6 +33,15 @@ class Manager():
     def create(self,key,scoreboard=str(),json=None):
         doesExist = self.doesExist(key,scoreboard=scoreboard)
         if doesExist != True:
+            if json != None:
+                ans = self.api(key, "POST", basket=scoreboard, body=json)
+            else:
+                ans = self.api(key, "POST", basket=scoreboard)
+            return self.safeCast(ans)
+    # Replaces a basket if it exists
+    def replace(self,key,scoreboard=str(),json=None):
+        doesExist = self.doesExist(key,scoreboard=scoreboard)
+        if doesExist == True:
             if json != None:
                 ans = self.api(key, "POST", basket=scoreboard, body=json)
             else:

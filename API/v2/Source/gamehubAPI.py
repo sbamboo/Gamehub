@@ -206,7 +206,7 @@ class scoreboardConnector():
         '''
         # Variables
         self.parentPath = os.path.dirname(__file__)
-        self.managerFormat = [1, "https://sbamboo.github.io/websa/Gamehub/API/v2/docs/managers/format1.html"]
+        self.managerFormat = [2, "https://sbamboo.github.io/websa/Gamehub/API/v2/docs/managers/format2.html"]
         # Manager file
         if managersFile == "GLOBAL":
             managersFile = f"{self.parentPath}\\managers.jsonc"
@@ -249,6 +249,8 @@ class scoreboardConnector():
     # Method functions
     def create(self,scoreboard=str(),jsonDict=None):
         return self.storageManager.create(self.key,scoreboard,jsonDict)
+    def replace(self,scoreboard=str(),jsonDict=None):
+        return self.storageManager.create(self.key,scoreboard,jsonDict)
     def remove(self,scoreboard=str()):
         return self.storageManager.remove(self.key,scoreboard)
     def get(self,scoreboard=str()):
@@ -276,12 +278,13 @@ def gamehub_getTOS(net=bool()):
 def gamehub_scoreboardFunc(
         encType=None,manager=None,apiKey=None,encKey=None,managerFile=None,ignoreManFormat=None,
         _scoreboard=str(),jsonData=str(),
-        create=False,remove=False,get=False,append=False, doesExist=False
+        create=False,replace=False,remove=False,get=False,append=False, doesExist=False
     ):
     # Create scoreboardConnector
     scoreboard = scoreboardConnector(encryptionType=encType, storageType=manager, key=apiKey, kryptographyKey=encKey, managersFile=managerFile, ignoreManagerFormat=ignoreManFormat)
     # Actions
     if create == True: return scoreboard.create(scoreboard=_scoreboard,jsonDict=jsonData)
+    elif replace == True: return scoreboard.replace(scoreboard=_scoreboard,jsonDict=jsonData)
     elif remove == True: return scoreboard.remove(scoreboard=_scoreboard)
     elif get == True: return scoreboard.get(scoreboard=_scoreboard)
     elif append == True: return scoreboard.append(scoreboard=_scoreboard,jsonDict=jsonData)
@@ -335,6 +338,7 @@ if __name__ == '__main__':
     parser.add_argument('-m_scoreboard', dest='m_scoreboard', help="mainAPI: scoreboard to use (str)")
     parser.add_argument('-m_jsonData', dest='m_jsonData', help="mainAPI: json data to send (str)")
     parser.add_argument('--m_create', dest='m_create', help="mainAPI: Creates a scoreboard.", action='store_true')
+    parser.add_argument('--m_replace', dest='m_replace', help="mainAPI: Replaces a scoreboard.", action='store_true')
     parser.add_argument('--m_remove', dest='m_remove', help="mainAPI: Remove a scoreboard.", action='store_true')
     parser.add_argument('--m_get', dest='m_get', help="mainAPI: Gets a scoreboard.", action='store_true')
     parser.add_argument('--m_append', dest='m_append', help="mainAPI: Appends data to a scoreboard.", action='store_true')
@@ -381,7 +385,7 @@ if __name__ == '__main__':
         out = gamehub_getTOS(net=args.m_net)
         print(out)
     if args.asFunction == True:
-        out = gamehub_scoreboardFunc(encType=args.m_encType,manager=args.m_manager,apiKey=args.m_apiKey,encKey=args.m_encKey,managerFile=args.m_managerFile,ignoreManFormat=args.m_ignoreManFormat,_scoreboard=args.m_scoreboard,jsonData=args.m_jsonData,create=args.m_create,remove=args.m_remove,get=args.m_get,append=args.m_append,doesExist=args.m_doesExist)
+        out = gamehub_scoreboardFunc(encType=args.m_encType,manager=args.m_manager,apiKey=args.m_apiKey,encKey=args.m_encKey,managerFile=args.m_managerFile,ignoreManFormat=args.m_ignoreManFormat,_scoreboard=args.m_scoreboard,jsonData=args.m_jsonData,create=args.m_create,replace=args.m_replace,remove=args.m_remove,get=args.m_get,append=args.m_append,doesExist=args.m_doesExist)
         print(out)
 
 # Info

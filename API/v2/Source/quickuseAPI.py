@@ -43,7 +43,7 @@ def gamehub_userData(
         # remove user
         _dict.pop(user)
         # create scoreboard with modified data
-        scoreboard.create(scoreboard=scoreboard,jsonDict=_dict)
+        scoreboard.replace(scoreboard=scoreboard,jsonDict=_dict)
     elif getUser == True:
         _json = scoreboard.get(scoreboard=scoreboard)
         try: _dict = json.loads(_json)
@@ -303,6 +303,7 @@ if __name__ == '__main__':
     parser.add_argument('--qu_encrypt', dest="qu_encrypt", action="store_true", help="QuickuseFuncs: Encrypt?! (bool)")
     parser.add_argument('-qu_apiConfPath', dest="qu_apiConfPath", help="QuickuseFuncs: APIconf path (str)")
     parser.add_argument('--qu_create', dest="qu_create", action="store_true", help="QuickuseFuncs: create method (bool)")
+    parser.add_argument('--qu_replace', dest="qu_replace", action="store_true", help="QuickuseFuncs: replace method (bool)")
     parser.add_argument('--qu_remove', dest="qu_remove", action="store_true", help="QuickuseFuncs: remove method (bool)")
     parser.add_argument('--qu_get', dest="qu_get", action="store_true", help="QuickuseFuncs: get method (bool)")
     parser.add_argument('--qu_append', dest="qu_append", action="store_true", help="QuickuseFuncs: append method (bool)")
@@ -349,7 +350,7 @@ if __name__ == '__main__':
         )
         print(ans)
     if args.qu_apiconfFunc:
-        ans =  apiConfig_gamehub_scoreboardFunc(apiConfPath=args.qu_apiConfPath,scoreboard=args.qu_scoreboard,jsonData=args.qu_dictData, create=args.qu_create,remove=args.qu_remove,get=args.qu_get,append=args.qu_append, doesExist=args.qu_doesExist)
+        ans =  apiConfig_gamehub_scoreboardFunc(apiConfPath=args.qu_apiConfPath,scoreboard=args.qu_scoreboard,jsonData=args.qu_dictData, create=args.qu_create,replace=args.qu_replace,remove=args.qu_remove,get=args.qu_get,append=args.qu_append, doesExist=args.qu_doesExist)
         print(ans)
     ## [SaveService]
     if args.ss_function:
