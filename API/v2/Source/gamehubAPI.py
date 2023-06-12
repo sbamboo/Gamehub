@@ -250,7 +250,7 @@ class scoreboardConnector():
     def create(self,scoreboard=str(),jsonDict=None):
         return self.storageManager.create(self.key,scoreboard,jsonDict)
     def replace(self,scoreboard=str(),jsonDict=None):
-        return self.storageManager.create(self.key,scoreboard,jsonDict)
+        return self.storageManager.replace(self.key,scoreboard,jsonDict)
     def remove(self,scoreboard=str()):
         return self.storageManager.remove(self.key,scoreboard)
     def get(self,scoreboard=str()):
