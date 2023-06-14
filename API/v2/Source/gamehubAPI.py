@@ -183,6 +183,33 @@ def loadDict(securityLevel=int(),encType=None,encKey=None,hashType=None, tempFol
     except: raise Exception("Failed to load Json, probably wrong encKey")
 
 # ========================================================[Main GamehubAPI]========================================================
+# Function for formatVersion compatCheck
+def formatIsCompat(hostFormat=list,manFormat=list) -> bool:
+    compat = False
+    # Get how check
+    if len(hostFormat) > 2 and len(manFormat) > 2:
+        hostSups = hostFormat[2]
+        manSups = manFormat[2]
+    elif len(hostFormat) > 2 and len(manFormat) < 3:
+        hostSups = hostFormat[2]
+        manSups = []
+    elif len(hostFormat) < 3 and len(manFormat) > 2:
+        hostSups = []
+        manSups = manFormat[2]
+    elif len(hostFormat) < 3 and len(manFormat) < 3:
+        hostSups = []
+        manSups = []
+    # CHECK
+    hostVer = int(hostFormat[0])
+    manVer = int(manFormat[0])
+    if hostVer == manVer:
+        compat = True
+    elif hostVer in manSups:
+        compat = True
+    elif manVer in hostSups:
+        compat = True
+    return compat
+
 # ScoreboardConnector
 class scoreboardConnector():
     # Functions/Code for dynamic imports
@@ -195,7 +222,7 @@ class scoreboardConnector():
             managers[manager] = {"module":fromPath(managers_dict[manager]["path"]),"needKey":managers_dict[manager]["needKey"]}
         return managers
     # Initator
-    def __init__(self, encryptionType=None, storageType=None, key=None, kryptographyKey=None, managersFile=None, ignoreManagerFormat=False):
+    def __init__(self, encryptionType=None, storageType=None, key=None, kryptographyKey=None, managersFile=None, ignoreManagerFormat=False, doCheckExistance=None):
         '''
         encryptionType: "aes" or "legacy" or "None"
         storegeType: "pantry"
@@ -203,10 +230,12 @@ class scoreboardConnector():
         kryptographyKey should only be supplied if encryptionType needs it
         managersFile is if you want to load dynamicManagers
         ignoreManagerFormat is used if you want to ignore a managers format
+        doCheckExistance if set to True, wont check scoreboard existance (Less requests sent but less safe) NOTE WILL GET SENT EVEN TO UNSUPPORTING MANAGER, SO DONT SET TO TRUE IF YOUR MANAGER DOESN'T SUPPORT IT
         '''
         # Variables
         self.parentPath = os.path.dirname(__file__)
-        self.managerFormat = [2, "https://sbamboo.github.io/websa/Gamehub/API/v2/docs/managers/format2.html"]
+        self.managerFormat = [3, "https://sbamboo.github.io/websa/Gamehub/API/v2/docs/managers/format3.html",[2]]
+        self.doCheckExistance = doCheckExistance
         # Manager file
         if managersFile == "GLOBAL":
             managersFile = f"{self.parentPath}\\managers.jsonc"
@@ -231,9 +260,12 @@ class scoreboardConnector():
             if storageType in list(dynamicManagers.keys()):
                 # check format
                 if ignoreManagerFormat == False:
-                    if int(dynamicManagers[storageType]["module"].managerFormat[0]) != int(self.managerFormat[0]):
+                    if formatIsCompat(hostFormat=self.managerFormat, manFormat=dynamicManagers[storageType]["module"].managerFormat) == False:
                         raise Exception(f"Manager for {storageType} is not supported on this version of gamehubAPI, managerFormat:{dynamicManagers[storageType]['module'].managerFormat[0]} whilst apiFormat:{self.managerFormat[0]}. See {self.managerFormat[1]}")
-                self.storageManager = dynamicManagers[storageType]["module"].Manager()
+                if doCheckExistance == None:
+                    self.storageManager = dynamicManagers[storageType]["module"].Manager()
+                else:
+                    self.storageManager = dynamicManagers[storageType]["module"].Manager(doCheckExistance)
                 self.needKey = bool(dynamicManagers[storageType]["needKey"])
             else:
                 raise Exception(f"Storage type '{storageType}' not found!")
@@ -247,12 +279,15 @@ class scoreboardConnector():
         else:
             self.key = None
     # Method functions
-    def create(self,scoreboard=str(),jsonDict=None):
-        return self.storageManager.create(self.key,scoreboard,jsonDict)
-    def replace(self,scoreboard=str(),jsonDict=None):
-        return self.storageManager.replace(self.key,scoreboard,jsonDict)
-    def remove(self,scoreboard=str()):
-        return self.storageManager.remove(self.key,scoreboard)
+    def create(self,scoreboard=str(),jsonDict=None,doCheck=None):
+        if doCheck == None: return self.storageManager.create(self.key,scoreboard,jsonDict)
+        else:               return self.storageManager.create(self.key,scoreboard,jsonDict,doCheck=doCheck)
+    def replace(self,scoreboard=str(),jsonDict=None,doCheck=None):
+        if doCheck == None: return self.storageManager.replace(self.key,scoreboard,jsonDict)
+        else:               return self.storageManager.replace(self.key,scoreboard,jsonDict,doCheck=doCheck)
+    def remove(self,scoreboard=str(),doCheck=None):
+        if doCheck == None: return self.storageManager.remove(self.key,scoreboard)
+        else:               return self.storageManager.remove(self.key,scoreboard,doCheck=doCheck)
     def get(self,scoreboard=str()):
         return self.storageManager.get(self.key,scoreboard)
     def append(self,scoreboard=str(),jsonDict=dict()):
@@ -264,6 +299,54 @@ class scoreboardConnector():
         return self.encdec(key=self.kryptokey,inputs=string,mode=mode)
     def EncDecDict(self,_dict,mode):
         return self.encdec_dict(key=self.kryptokey,dictionary=_dict,mode=mode)
+
+class experimental_linkedDictionary():
+    # INIT
+    def __init__(self,connector,scoreboard):
+        self.connector = connector
+        self.scoreboard = scoreboard
+    # Internal
+    def _get(self):
+        return self.connector.get(self.scoreboard)
+    def _set(self,data):
+        self.connector.replace(self.scoreboard, data)
+    # Methods
+    def __setitem__(self, key, value):
+        self.connector.append(self.scoreboard,{key:value})
+    def __ior__(self, other):
+        if isinstance(other, dict):
+            self.connector.append(self.scoreboard,other)
+        return self
+    def __getitem__(self, key):
+        local = self._get()
+        return local[key]
+    def append(self,data):
+        self.connector.append(self.scoreboard,data)
+    def update(self,data):
+        local = self._get()
+        local.update(data)
+        self._set(local)
+    def get(self,key=None):
+        if key != None:
+            return self._get()[key]
+        else:
+            return self._get()
+    def set(self,data):
+        self.connector.replace(self.scoreboard,data)
+    # ConnectorMethods
+    def conn_create(self,data=None):
+        if data != None:
+            self.connector.create(self.scoreboard, data)
+        else:
+            self.connector.create(self.scoreboard)
+    def conn_replace(self,data):
+        self.connector.replace(self.scoreboard,data)
+    def conn_append(self,data):
+        self.connector.append(self.scoreboard,data)
+    def conn_get(self):
+        self.connector.get(self.scoreboard)
+    def conn_remove(self):
+        self.connector.remove(self.scoreboard)
 
 # Function to get TOS
 def gamehub_getTOS(net=bool()):

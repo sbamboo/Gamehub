@@ -1,11 +1,11 @@
 {
-    "Name": "GamehubAPI 2.1 (ALPHA)",
+    "Name": "GamehubAPI 2.2 (ALPHA)",
     "Desc": "New gamehubAPI, looking for a better way to handle scoreboads aswell as allowing backwards compatability with older versions of the API",
     "Version": {
         "Major": "2",
-        "Minor": "1",
-        "Vid": "2",
-        "ReleaseDate": "2023-06-09"
+        "Minor": "2",
+        "Vid": "3",
+        "ReleaseDate": "2023-06-13"
     },
     "License": "https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/tos.txt",
     "Platform": "Crossplatform-PYTHON3"
