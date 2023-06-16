@@ -124,6 +124,14 @@ def gamehub_singleSave_score(
         _jsonData = json.dumps( {_dict["user"] : _dict["data"]} )
         gh.gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], jsonData=_jsonData, append=True)
 
+# Function to remove comments from json
+def removeComments(json_string):
+    '''function to strip comments from a raw json string and returns the stripped string'''
+    # Match and remove single-line comments that start with //
+    pattern = r"(^|\s)//.*$"
+    without_comments = re.sub(pattern, "", json_string, flags=re.MULTILINE)
+    return without_comments
+
 # Function to handle apiConfigs
 def getAPIConfig(apiConfPath=str()) -> dict:
     secureFileEndings = ["sconf","sconfig","secConf","secConfig","ghsc","gh_sconf","gh_sconfig"]
@@ -134,6 +142,7 @@ def getAPIConfig(apiConfPath=str()) -> dict:
         #DecryptContent
         content = decrypt_string(content,getSafeConfigKey())
     # Return content
+    content = removeComments(content)
     return json.loads(content)
 
 # ScoreboardConnector
