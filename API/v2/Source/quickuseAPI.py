@@ -1,5 +1,5 @@
 # [Imports]
-import os,importlib.util,base64,subprocess,json,platform,sys
+import os,importlib.util,base64,subprocess,json,platform,sys,re
 
 # [Importa function]
 def fromPath(path):
