@@ -1,5 +1,5 @@
 # [Imports]
-import os,importlib.util,base64,subprocess,json,platform,sys,re,system
+import os,importlib.util,base64,subprocess,json,platform,sys,re,platform
 
 # [Importa function]
 def fromPath(path):
@@ -269,7 +269,7 @@ def gamehub_saveService_off(exitFile=str()):
     open(exitFile,'w').write("1")
 
 # BackupSystem
-def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=str,apiConfPath=None,backupStoreMode="off",backupStoreLocation=None,ping=False,backupInterval=None,breakFilePath=None):
+def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=str,apiConfPath=None,backupStoreMode="off",backupStoreLocation=None,ping=False,backupInterval=None,breakFilePath=None,serviceManagerFile=None):
     '''
     mode: 'schedule' or 'unschedule' or 'breakLoopExecute'
     pythonPathOverwrite: Overwriting python path
@@ -287,9 +287,13 @@ def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=st
         < 1_minutes:  Asks you if you wan't to run loopExecute (Loops until CTRL+C or similar)
         <int>_<unit>, Example: 1_minutes/24_Hours (Allowed units: minutes, hours, days, weeks, months)
     breakFilePath: A path to a breakfile incase using loopExecute.
+    serviceManagerFile: boolean to if should use the service's internal manager file.
     '''
+    if mode == None: mode = "schedule"
+    if backupStoreMode == None: backupStoreMode = "off"
+    if serviceManagerFile == "": serviceManagerFile == None
     # Unix message
-    if system.platform() != "Windows":
+    if platform.system() != "Windows":
         print("OBS! This functionality uses libschedule, on unix if a schedule dosen't run you should run unixSetup.py, look at documentation for this in: libs/libschedule/readme.txt!")
         confirm = input("Have you read readme.txt and made neccesairy actions? [y/n] ")
         if confirm.lower() != "y":
@@ -302,7 +306,7 @@ def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=st
         python = sys.executable
     parent = os.path.abspath(os.path.dirname(__file__))
     service = f"{parent}{os.sep}internal_services{os.sep}backup{os.sep}service.py"
-    command = f'{service} -apiConfPath "{apiConfPath}" -scoreboard "{scoreboard}"'
+    command = f'-apiConfPath "{apiConfPath}" -scoreboard "{scoreboard}"'
     cliWrapper = f"{parent}{os.sep}libs{os.sep}libschedule{os.sep}cliWrapper.py"
     # Add non required variables
     if backupStoreMode != None and backupStoreMode != "off":
@@ -311,8 +315,10 @@ def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=st
         command += f' -backupStoreLocation "{backupStoreLocation}"'
     if ping != None and ping != False:
         command += f' --ping'
+    if serviceManagerFile != None:
+        command += f' --serviceManagerFile'
     # Generate scheduleCommand
-    scommand = f'{cliWrapper} -task_name "{scoreboard}" -python_path "{python}" -script_path "{python}" -script_args "{command}"'
+    scommand = f'{python} {cliWrapper} -task_name "{scoreboard}" -python_path "{python}" -script_path "{service}" -script_args "{command}" -interval_str "{backupInterval}"'
     if breakFilePath != None and breakFilePath != "":
         scommand += f' -break_file_path "{breakFilePath}"'
     # execute service
@@ -330,7 +336,7 @@ def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=st
         open(breakFilePath,"w").write("1")
     # Unschedule
     else:
-        scommand = f'{cliWrapper} -task_name "{scoreboard}" --unschedule'
+        scommand = f'{python} {cliWrapper} -task_name "{scoreboard}" --unschedule'
         os.system(scommand)
 
         
@@ -396,6 +402,7 @@ if __name__ == '__main__':
     parser.add_argument('-bs_mode', dest="bs_mode", help="BackupService: Execution mode, can be: 'schedule', 'unschedule' or 'breakLoopExecute' (str)")
     parser.add_argument('-bs_pythonPathOverwrite', dest="bs_pythonPathOverwrite", help="BackupService: Optional python path overwrite (str)")
     parser.add_argument('-bs_breakFilePath', dest="bs_breakFilePath", help="BackupService: Path to breakfile incase using loopExecute (str)")
+    parser.add_argument('--bs_serviceManagerFile', dest="bs_serviceManagerFile", help="BackupService: Uses the backupServices internal manager file (str)",action="store_true")
     ## [SaveService]
     parser.add_argument('-ss_apiConfPath', dest="ss_apiConfPath", help="SaveService: APIconf path (str)")
     parser.add_argument('-ss_linkedFile', dest="ss_linkedFile", help="SaveService: LinkedFile path (str)")
@@ -452,7 +459,7 @@ if __name__ == '__main__':
         print(ans)
     ## [BackupService]
     if args.bs_backupService:
-        ans = gamehub_backupService(apiConfPath=args.bs_apiConfPath,scoreboard=args.bs_scoreboard,backupStoreMode=args.bs_backupMode,backupStoreLocation=args.bs_backupLoc,ping=args.bs_ping,backupInterval=args.bs_interval,mode=args.bs_mode,pythonPathOverwrite=args.bs_pythonPathOverwrite,breakFilePath=args.bs_breakFilePath)
+        ans = gamehub_backupService(apiConfPath=args.bs_apiConfPath,scoreboard=args.bs_scoreboard,backupStoreMode=args.bs_backupMode,backupStoreLocation=args.bs_backupLoc,ping=args.bs_ping,backupInterval=args.bs_interval,mode=args.bs_mode,pythonPathOverwrite=args.bs_pythonPathOverwrite,breakFilePath=args.bs_breakFilePath,serviceManagerFile=args.bs_serviceManagerFile)
         print(ans)
     ## [SaveService]
     if args.ss_function:

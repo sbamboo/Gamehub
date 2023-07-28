@@ -2,7 +2,7 @@
 
 import os
 import sys
-import system
+import platform
 import getpass
 import subprocess
 
@@ -30,7 +30,7 @@ def main():
     print("For info abt this script look at readme.txt")
 
     # Windows platform message
-    if system.platform() == "Windows" and anyplatform == False:
+    if platform.system() == "Windows" and anyplatform == False:
         print("This script only needs to run on Unix based systems! (that uses 'cron')")
         exit()
 

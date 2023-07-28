@@ -17,6 +17,8 @@ cparser.add_argument('--unschedule', dest="unschedule", help="Use to unschedule 
 # Create main arguments object
 argus = cparser.parse_args()
 
+#print(f"[cliWrapper: Start]\nScriptPath: {argus.script_path}\nScriptArgs: {argus.script_args}\nPythonPath: {argus.python_path}\nPythonArgs: {argus.python_args}\n[cliWrapper: End]")
+
 # Execute function
 if argus.schedule == True:
     parse_interval_and_generate_schedule(

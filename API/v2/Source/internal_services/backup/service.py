@@ -19,9 +19,26 @@ parser.add_argument('-backupStoreMode',dest='backupStoreMode')
 parser.add_argument('-backupStoreLocation',dest='backupStoreLocation')
 parser.add_argument('--ping',dest='ping',action="store_true")
 parser.add_argument('--doCheckExistance',dest='doCheckExistance',action="store_true")
-parser.add_argument('--serviceManagerFile',dest='serviceManagerFile',action="store_true",help="ONLY USE WHEN RUNNING service.py DIRECTLY")
+parser.add_argument('--serviceManagerFile',dest='serviceManagerFile',action="store_true",help="Use when running service.py directly or when to change directory of the managers.")
 args = parser.parse_args()
 
+# Dynamicates managers
+if args.serviceManagerFile == True:
+    _parent = os.path.abspath(os.path.dirname(__file__))
+    _gamehubApiSourcePath = f"{_parent}{os.sep}..{os.sep}..{os.sep}"
+    _gamehubGlobalManagerFile = f"{os.path.abspath(_gamehubApiSourcePath)}{os.sep}managers.jsonc"
+    # Get from GLOBAL
+    _json = open(_gamehubGlobalManagerFile,'r').read()
+    _dict = json.loads(_json)
+    # Dynamicate path
+    for key,value in _dict.items():
+        _path = value["path"]
+        _suffix = f"managers" + _path.split("managers")[-1]
+        _prefix = os.path.abspath(_gamehubApiSourcePath)
+        _newpath = f"{_prefix}{os.sep}{_suffix}"
+        _dict[key]["path"] = _newpath
+    _json = json.dumps(_dict)
+    open(managerFile,'w').write(_json)
 # Functions
 def switchQuotes(string) -> str:
     string = string.replace("'","\uFFFC")

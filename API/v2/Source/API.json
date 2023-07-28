@@ -1,12 +1,12 @@
 {
-    "Name": "GamehubAPI 2.4 (ALPHA)",
+    "Name": "GamehubAPI 2.5 (ALPHA)",
     "Desc": "New gamehubAPI, looking for a better way to handle scoreboads aswell as allowing backwards compatability with older versions of the API",
     "Version": {
         "Major": "2",
-        "Minor": "4",
-        "Vid": "5",
+        "Minor": "5",
+        "Vid": "6",
         "ReleaseDate": "2023-07-28",
-        "ChangelogNote": "Added the backupSystem and added a ovmf(overwriteManagerFile) mode to quickuseAPi.apiConfScoreboardConnector (over_cli) allowing to overwrite the apiConf one, making sconfigs more versitile."
+        "ChangelogNote": "Added the backupSystem and added a ovmf(overwriteManagerFile) mode to quickuseAPi.apiConfScoreboardConnector (over_cli) allowing to overwrite the apiConf one, making sconfigs more versitile. Edit: Fixed bugs on the backup system."
     },
     "License": "https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/tos.txt",
     "Platform": "Crossplatform-PYTHON3"
