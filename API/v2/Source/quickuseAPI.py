@@ -311,7 +311,7 @@ def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=st
     cliWrapper = f"{parent}{os.sep}libs{os.sep}libschedule{os.sep}cliWrapper.py"
     # Add once to pingMessage
     if backupInterval == None: backupInterval == ""
-    if backupInterval.lower() == "once":
+    if str(backupInterval).lower() == "once":
         if pingMessage == None or pingMessage == "":
             pingMessage = "Interval:Once"
         else:
