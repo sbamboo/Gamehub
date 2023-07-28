@@ -294,7 +294,7 @@ def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=st
         confirm = input("Have you read readme.txt and made neccesairy actions? [y/n] ")
         if confirm.lower() != "y":
             print("PLESE READ readme.txt! (Breaking...)")
-            break
+            return
     # Variable Define
     if pythonPathOverwrite != None:
         python = pythonPathOverwrite
