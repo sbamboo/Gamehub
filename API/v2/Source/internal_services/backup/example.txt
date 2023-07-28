@@ -1,5 +1,0 @@
-Schedule:
-python quickuseAPI.py --backupService -bs_apiConfPath "C:\Users\%username%\Desktop\api.sconf" -bs_scoreboard "test" -bs_backupMode "on" -bs_backupLoc "C:\Users\%username%\Desktop\backups" -bs_interval "1_minutes" --bs_ping --bs_serviceManagerFile
-
-Unshedule:
-python quickuseAPI.py --backupService -bs_scoreboard "test" -bs_mode "unschedule"

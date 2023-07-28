@@ -2,7 +2,9 @@ managerFormat = [3, "https://sbamboo.github.io/websa/Gamehub/API/v2/docs/manager
 
 
 import importlib.util
+import os
 def fromPath(path):
+    path = path.replace("\\",os.sep)
     spec = importlib.util.spec_from_file_location("module", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

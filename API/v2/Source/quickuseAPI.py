@@ -3,6 +3,7 @@ import os,importlib.util,base64,subprocess,json,platform,sys,re,platform
 
 # [Importa function]
 def fromPath(path):
+    path = path.replace("\\",os.sep)
     spec = importlib.util.spec_from_file_location("module", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -10,14 +11,14 @@ def fromPath(path):
 parentDir = os.path.dirname(__file__)
 
 # [Dynamic Imports]
-gh = fromPath(f"{parentDir}\\gamehubAPI.py")
-_fs = fromPath(f"{parentDir}\\libs\\libfilesys.py")
+gh = fromPath(f"{parentDir}{os.sep}gamehubAPI.py")
+_fs = fromPath(f"{parentDir}{os.sep}libs{os.sep}libfilesys.py")
 fs = _fs.filesys
 def decrypt_string():pass
-rsa = fromPath(f"{parentDir}\\libs\\libRSA.py")
+rsa = fromPath(f"{parentDir}{os.sep}libs{os.sep}libRSA.py")
 decrypt_string = rsa.decrypt_string
 exec(base64.b64decode("aW1wb3J0IGdldHBhc3MKaW1wb3J0IHNvY2tldAppbXBvcnQgZGF0ZXRpbWUKaW1wb3J0IGhhc2hsaWIKCmRlZiBlbnRyb3B5R2VuZXJhdG9yKCkgLT4gc3RyOgogICAgdXNlciA9IGdldHBhc3MuZ2V0dXNlcigpCiAgICBob3N0ID0gc29ja2V0LmdldGhvc3RuYW1lKCkKICAgIGlwX2FkZHJlc3MgPSBzb2NrZXQuZ2V0aG9zdGJ5bmFtZShob3N0KQogICAgZGF0ZSA9IGRhdGV0aW1lLmRhdGUudG9kYXkoKS5zdHJmdGltZSgnJXktJW0tJWQnKQogICAgZW50cm9weV9zdHIgPSBmJ3t1c2VyfS17aG9zdH0te2lwX2FkZHJlc3N9LXtkYXRlfScKICAgIGVudHJvcHkgPSBoYXNobGliLnNoYTI1NihlbnRyb3B5X3N0ci5lbmNvZGUoKSkuaGV4ZGlnZXN0KCkKICAgIHJldHVybiBlbnRyb3B5CgpkZWYgZ2V0U2FmZUNvbmZpZ0tleSgpIC0+IHN0cjoKICAgIHJldHVybiAiLS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tXG5NSUlFdlFJQkFEQU5CZ2txaGtpRzl3MEJBUUVGQUFTQ0JLY3dnZ1NqQWdFQUFvSUJBUURlT1dORGxwOHZmVnNrXG5CaG4xWThKUnZoVFRJS2pDR3NyS1NGbmR6d21hU0hLSjNhQWVzVWE2SGpBTzV6MGpjOUpyQVp2SGZ3eUFHZDQzXG5TOHhkL2x1SkFtcU5HcHNZZitvZU5tZ2ZLdTNTaDh2Yjd6dGxXcndsMUdEVG1KaXZsdjVGYnAyeGdldFZyczJFXG55NStTNThRZlpTZlVJVGNqYVFMbHhaOVZ5S084dk1pdDJsYkUvWkFaazJwYU00ZzJkeHQwV2MxRm5zRnY3TXdwXG5sekttRitteWpVRHNhbGo2TGxsbUxJM05kN2pSQkNaZis2dmVlWURSWE1xVjJ3UnhGd3pPbm5VODFTUmJrS3B2XG5pODgyU09hMnVaYzI5d3RWWjVtTjJQTUQ1cEFnSElsNXJWdU16WGhVWjA4bVhMY2I1cWRnc01zRmRsWTdkT0psXG4zUjNvSnFCeEFnTUJBQUVDZ2dFQVU4bURlY3BpdnI4ZkRCZ1kxWU1GazFoOTlaVE16RkxadnlkRWF2TlRCWTduXG5VTC8xVFYwOTg1TEtQL1JFQXdmNmdFb2MrRDBZODN2Tll6LzdFRDJGT2NWbGMwcGl5L3YrdytGenBMekU2cW8wXG4zUG40aFNDTzdCeUZYWUtkbnlicFBEaVcwSVRSdkg2cUVyWEx0dElZQ2xaVGpCSHgvakhyMjhLRmJ3eTFYOFdDXG5YRTZpeDZVMTUyNysrb2RvbmtoU29EYVlvWHBLVmkyMnNka1ZUaUtuY2RWZUVBUHl4dTRTVUQ5K01mZi9heDd1XG5rTHpQMWJ1c3VpeGpUc0szYTRJbW5EQituTWh0b1B6RjZwUWVtUDVOWENNRFh2VHhRcHJ3VkJyUWZSZ3lOekg2XG5QMWpkTGlYSTkwcEpJL3lDeXpITmt4Rmo2aXNKUHlnSmpvbTVXRmE4dVFLQmdRRG5uT2JkdmE3NGx1R0tRQzliXG5SbXhpc0tpUS9LUFpRMkhOcE9ubFNidHNnSnd3SjlIYXJlMDJsT1ZwYjBEQmQ4TVVreENEWjJ4dSs4TFR1ZmNTXG4ycTVRTTJsZGNpN0Z3Rk5Nd2lYM2JzeVFveGIzQmluQVRwelF6dlh0ckUydmpFMjc4T1I2WnFib0FtWVQ1UFd5XG5qZFVhZWFCYngyeFVzTmFBTk10czZYK1ZLd0tCZ1FEMW4ybjJFcTY5TEdmcmtKMlpEMGRISmk4cVFmSkV1aHFaXG5FM0ZJdWo3aVRpelM5eXlJTnJ6b0VteTVaUGV4VFdDMmQvTnJhQ2gvcDJJcmRMNkZWNUdZbHowRlFSNDdpR3ZrXG4vT3dUOEl0SzdMS2x6bUNDU3RzL1JxZkx3dUZOVXZqSnY5NWNiTGJUKzF3ckxIVXV0QVdtSVlic2tFbi9IWDN5XG41WTBGS1FFSzB3S0JnSEZlcE1iZlJSa2JTWlRSYkJ6Q2NPVXgwYUQrZVBrcytWK2VuSHFHUjc2SmlXb3M0NVNsXG4wOW9Hc2ZDVTYxNkh6NjV2ZWdMSUNoU2RHVFZuN3ArRStSUDZ4bFZlUWJTOE9rbjFNbjVWOXIzSmhzRXRmQnhNXG5ub2U2OWpmN1FoOXVqdEl5ekxONU1iT1pFUHdsODNvTjRNVFB5Z1dDck8wYmpqTTlKR0hRUFluM0FvR0FlbEovXG50THF0Snl6OFBBWnpWZ3lUMU0waFpBd2ZtVGFObEhwb1NtM21iMUc3WlAwUHdtNXdPYXNqVmxrQU9kNXRNYklmXG5HZmh2WXRON1FtVUxsT0I5Yzk2dDF2WU5GbHprVHMvZXlqZGJSMThGd1NrOFN1YjR0VlI4c0M5SGdQaTNTZEl4XG43UmwvRzZic3lkdUVLRlFqRkE5U1lIR2pTRmZwcDVQR1hUR0VnVjBDZ1lFQXVSbERiUmZNT0VFVkx4bEx3VmttXG40K0pjRTNGck9NVjh6RlZRSEQ4NXlKeDhuRGxGNlU3TE5FMmZTUzRRbkdtNVA4OUVBYjV2UGMrZkJma21ZSVBRXG5RVDY5TXJuOFhpZmxKa1I4elVtVFJlditqeVB2WFZ3dlRISDYwb3F0VnZJeGF1cFoveWJNSnVzazN6bTZWMmdWXG4vYkUvVXRhM0YwN2hkYVdQMjlzampqQT1cbi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS1cbiI=").decode("utf-8"))
-libhasher = fromPath(f"{parentDir}\\libs\\libhasher.py")
+libhasher = fromPath(f"{parentDir}{os.sep}libs{os.sep}libhasher.py")
 hashFile = libhasher.hashFile
 hashString = libhasher.hashString
 
@@ -254,7 +255,7 @@ def gamehub_saveService_on(pyPath="python3",apiConfPath=str(),linkedFile=str(),e
         creation_flags = subprocess.CREATE_NEW_CONSOLE
     else: raise NotImplementedError(f'Unsupported operating system: {current_os}')
     # Setup command
-    command2 = [pyPath, f"{os.path.dirname(__file__)}\\internal_services\\save\\service.py", "-apiConfpath", apiConfPath, "-linkedFile", linkedFile, "-exitFile", exitFile]
+    command2 = [pyPath, f"{os.path.dirname(__file__)}{os.sep}internal_services{os.sep}save{os.sep}service.py", "-apiConfpath", apiConfPath, "-linkedFile", linkedFile, "-exitFile", exitFile]
     if current_os == 'Darwin': command2.pop(0)
     for e in command2: command.append(e)
     if doEncrypt == True: command.append("--doEncrypt")
@@ -422,7 +423,7 @@ if __name__ == '__main__':
     parser.add_argument('--autoPath', dest="autopath", help="EXPERIMENTAL, DEBUG PURPOSES", action="store_true")
     # Get Inputs
     args = parser.parse_args(sys.argv)
-    if args.autopath: os.chdir(f"{parentDir}\\..")
+    if args.autopath: os.chdir(f"{parentDir}{os.sep}..")
     # [QuickuseFunctions]
     if args.qu_userData:
         ans =  gamehub_userData(

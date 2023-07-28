@@ -1,24 +1,25 @@
 # Imports & Setup
-import json,os,uuid,tempfile,argparse,sys,importlib.util
+import json,os,uuid,tempfile,argparse,sys,importlib.util,platform
 parentPath = os.path.dirname(__file__)
 
 # Functions
 def fromPath(path):
+    path = path.replace("\\",os.sep)
     spec = importlib.util.spec_from_file_location("module", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
 
 # Dynnamic imports
-libhasher = fromPath(f"{parentPath}\\libs\\libhasher.py")
+libhasher = fromPath(f"{parentPath}{os.sep}libs{os.sep}libhasher.py")
 hashFile = libhasher.hashFile
 hashString = libhasher.hashString
-libfilesys = fromPath(f"{parentPath}\\libs\\libfilesys.py")
+libfilesys = fromPath(f"{parentPath}{os.sep}libs{os.sep}libfilesys.py")
 fs = libfilesys.filesys
 
 # ========================================================[require API]========================================================
 def requireAPI(apiVid=str(),verFileOverwrite=None):
-    if verFileOverwrite == None: verFileOverwrite = f"{os.path.dirname(__file__)}\\API.json"
+    if verFileOverwrite == None: verFileOverwrite = f"{os.path.dirname(__file__)}{os.sep}API.json"
     rawAPIdata = json.loads(open(verFileOverwrite,'r').read())
     matching = False
     newer = False
@@ -50,10 +51,10 @@ def requireAPI(apiVid=str(),verFileOverwrite=None):
     return matching,msg
 
 # ========================================================[Manager API]========================================================
-def registerManager(managerFile=f"{parentPath}\\managers.jsonc",name=str(),path=str(),needKey=bool()):
+def registerManager(managerFile=f"{parentPath}{os.sep}managers.jsonc",name=str(),path=str(),needKey=bool()):
     '''
        Registers a manager, by default in the global manager file. If your custom manager file is wanted give it's path to managerFile.
-       managerFile = <str>, Supply managerFile, otherwise will fallback to "os.path.dirname(__file__)\\managers.jsonc"
+       managerFile = <str>, Supply managerFile, otherwise will fallback to "os.path.dirname(__file__){os.sep}managers.jsonc"
        name = <str>,        Name of manager to register.
        path = <str>,        Path to the manager that will be registered. (.py files only)
        needKey = <bool>,    Whether or not the manager needs a key. (Encryption is choosen by user, so al cryptolib ones should be available or inform user otherwise)
@@ -74,10 +75,10 @@ def registerManager(managerFile=f"{parentPath}\\managers.jsonc",name=str(),path=
     # replace file
     json.dump(oldList, open(managerFile,'w'))
 
-def unregisterManager(managerFile=f"{parentPath}\\managers.jsonc",name=str()):
+def unregisterManager(managerFile=f"{parentPath}{os.sep}managers.jsonc",name=str()):
     '''
        Unregisters a manager, by default in the global manager file. If your custom manager file is wanted give it's path to managerFile.
-       managerFile = <str>, Supply managerFile, otherwise will fallback to "os.path.dirname(__file__)\\managers.jsonc"
+       managerFile = <str>, Supply managerFile, otherwise will fallback to "os.path.dirname(__file__){os.sep}managers.jsonc"
        name = <str>,        Name of manager to unregister.
     '''
     # No manager file
@@ -114,11 +115,11 @@ def cleanFolder(tempFolder=str()):
 def saveDict(securityLevel=int(),encType=None,encKey=None,hashType=None, tempFolder=str(), fileName=str(), jsonStr=str()) -> str:
     # Import encryption lib
     if encType == "legacy":
-        crypto = fromPath(f"{parentPath}\\libs\\libcrypto\\legacy.py")
+        crypto = fromPath(f"{parentPath}{os.sep}libs{os.sep}libcrypto{os.sep}legacy.py")
         encdec = crypto.encdec
         GenerateKey = crypto.GenerateKey
     elif encType == "aes":
-        crypto = fromPath(f"{parentPath}\\libs\\libcrypto\\aes.py")
+        crypto = fromPath(f"{parentPath}{os.sep}libs{os.sep}libcrypto{os.sep}aes.py")
         encdec = crypto.encdec
         GenerateKey = crypto.GenerateKey
     # Get secure fileName
@@ -145,11 +146,11 @@ def saveDict(securityLevel=int(),encType=None,encKey=None,hashType=None, tempFol
 def loadDict(securityLevel=int(),encType=None,encKey=None,hashType=None, tempFolder=str(), fileName=str(), filehash=None) -> dict:
     # Import encryption lib
     if encType == "legacy":
-        crypto = fromPath(f"{parentPath}\\libs\\libcrypto\\legacy.py")
+        crypto = fromPath(f"{parentPath}{os.sep}libs{os.sep}libcrypto{os.sep}legacy.py")
         encdec = crypto.encdec
         GenerateKey = crypto.GenerateKey
     elif encType == "aes":
-        crypto = fromPath(f"{parentPath}\\libs\\libcrypto\\aes.py")
+        crypto = fromPath(f"{parentPath}{os.sep}libs{os.sep}libcrypto{os.sep}aes.py")
         encdec = crypto.encdec
         GenerateKey = crypto.GenerateKey
     # encrypt
@@ -238,7 +239,7 @@ class scoreboardConnector():
         self.doCheckExistance = doCheckExistance
         # Manager file
         if managersFile == "GLOBAL":
-            managersFile = f"{self.parentPath}\\managers.jsonc"
+            managersFile = f"{self.parentPath}{os.sep}managers.jsonc"
         # Keyfile
         if "Keyfile:" in key:
             key = key.replace("Keyfile:","")
@@ -246,9 +247,9 @@ class scoreboardConnector():
         # CryptoType
         if encryptionType == None: encryptionType = "None"
         if encryptionType == "legacy":
-            encryptor = fromPath(f"{parentPath}\\libs\\libcrypto\\legacy.py")
+            encryptor = fromPath(f"{parentPath}{os.sep}libs{os.sep}libcrypto{os.sep}legacy.py")
         elif encryptionType == "aes":
-            encryptor = fromPath(f"{parentPath}\\libs\\libcrypto\\aes.py")
+            encryptor = fromPath(f"{parentPath}{os.sep}libs{os.sep}libcrypto{os.sep}aes.py")
         self.needKey = False
         if encryptionType != "None" and encryptionType != None:
             self.GenerateKey = encryptor.GenerateKey
@@ -355,7 +356,7 @@ def gamehub_getTOS(net=bool()):
         r = requests.get("https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/tos.txt", allow_redirects=True)
         return r.content
     else:
-        return open("..\\tos.txt",'r').read()
+        return open("..{os.sep}tos.txt",'r').read()
 
 # Main function for handling a scoreboard from a function
 def gamehub_scoreboardFunc(
@@ -397,7 +398,7 @@ if __name__ == '__main__':
     parser.add_argument('-rq_apiVid', dest="rq_apiVid", help="requireAPI: The version required to test (str)")
     parser.add_argument('-rq_verFileOverwrite','-rq_verfover', dest="rq_verFileOverwrite", help="requireAPI: Overwrite path of verFile (str)")
     ## [managerAPI]
-    parser.add_argument('-mg_managerFile', dest="mg_managerFile", help="managerAPI: Supply managerFile, otherwise will fallback to 'os.path.dirname(__file__)\\managers.jsonc' (str)")
+    parser.add_argument('-mg_managerFile', dest="mg_managerFile", help="managerAPI: Supply managerFile, otherwise will fallback to 'os.path.dirname(__file__){os.sep}managers.jsonc' (str)")
     parser.add_argument('-mg_name', dest="mg_name", help="managerAPI: Name of manager to register/unregister (str)")
     parser.add_argument('-mg_path', dest="mg_path", help="managerAPI: Path to the manager that will be registered, '.py' files only (str)")
     parser.add_argument('--mg_needKey', action='store_true', dest="mg_needKey", help="managerAPI: Whether or not the manager needs a key. Encryption is choosen by user, so al cryptolib ones should be available or inform user otherwise (str)")
