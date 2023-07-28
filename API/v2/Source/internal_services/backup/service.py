@@ -18,6 +18,7 @@ parser.add_argument('-scoreboard',dest='scoreboard')
 parser.add_argument('-backupStoreMode',dest='backupStoreMode')
 parser.add_argument('-backupStoreLocation',dest='backupStoreLocation')
 parser.add_argument('--ping',dest='ping',action="store_true")
+parser.add_argument('-pingMessage',dest='pingMessage',help="INTERNAL")
 parser.add_argument('--doCheckExistance',dest='doCheckExistance',action="store_true")
 parser.add_argument('--serviceManagerFile',dest='serviceManagerFile',action="store_true",help="Use when running service.py directly or when to change directory of the managers.")
 args = parser.parse_args()
@@ -92,8 +93,12 @@ if args.ping == True:
     newPing = {
         "GamehubVid": str(vid),
         "Timestamp": str(timestamp),
-        "StoreMode": str(args.backupStoreMode)
+        "StoreMode": str(args.backupStoreMode),
+        "Message": ""
     }
+    # Handle ping message
+    if args.pingMessage != None:
+        newPing["Message"] = str(args.pingMessage)
     # Make sure scoreboard has a ping field
     if scoreboardData.get("GamehubBackupServicePing") == None:
         scoreboardData["GamehubBackupServicePing"] = {}

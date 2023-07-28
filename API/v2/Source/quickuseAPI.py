@@ -270,7 +270,7 @@ def gamehub_saveService_off(exitFile=str()):
     open(exitFile,'w').write("1")
 
 # BackupSystem
-def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=str,apiConfPath=None,backupStoreMode="off",backupStoreLocation=None,ping=False,backupInterval=None,breakFilePath=None,serviceManagerFile=None):
+def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=str,apiConfPath=None,backupStoreMode="off",backupStoreLocation=None,ping=False,backupInterval=None,breakFilePath=None,serviceManagerFile=None,pingMessage=None):
     '''
     mode: 'schedule' or 'unschedule' or 'breakLoopExecute'
     pythonPathOverwrite: Overwriting python path
@@ -309,6 +309,13 @@ def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=st
     service = f"{parent}{os.sep}internal_services{os.sep}backup{os.sep}service.py"
     command = f'-apiConfPath "{apiConfPath}" -scoreboard "{scoreboard}"'
     cliWrapper = f"{parent}{os.sep}libs{os.sep}libschedule{os.sep}cliWrapper.py"
+    # Add once to pingMessage
+    if backupInterval == None: backupInterval == ""
+    if backupInterval.lower() == "once":
+        if pingMessage == None or pingMessage == "":
+            pingMessage = "Interval:Once"
+        else:
+            pingMessage = "Interval:Once; " + pingMessage
     # Add non required variables
     if backupStoreMode != None and backupStoreMode != "off":
         command += f' -backupStoreMode "{backupStoreMode}"'
@@ -318,6 +325,8 @@ def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=st
         command += f' --ping'
     if serviceManagerFile != None:
         command += f' --serviceManagerFile'
+    if pingMessage != None and pingMessage != "":
+        command += f' -pingMessage "{pingMessage}"'
     # Generate scheduleCommand
     scommand = f'{python} {cliWrapper} -task_name "{scoreboard}" -python_path "{python}" -script_path "{service}" -script_args "{command}" -interval_str "{backupInterval}"'
     if breakFilePath != None and breakFilePath != "":
@@ -326,11 +335,15 @@ def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=st
     if mode.lower() == "schedule":
         # Once
         if backupInterval.lower() == "once":
-            os.system(f"{python} {command}")
+            os.system(f"{python} {service} {command}")
         # Interval
         else:
-            scommand += " --schedule"
-            os.system(scommand)
+            if backupInterval != "":
+                scommand += " --schedule"
+                os.system(scommand)
+            else:
+                print("No backup interval given!")
+                return
     # Break loopExecute
     elif mode.lower() == "breakloopexecute":
         if os.path.exists(breakFilePath): os.remove(breakFilePath)
@@ -399,6 +412,7 @@ if __name__ == '__main__':
     parser.add_argument('-bs_backupMode', dest="bs_backupMode", help="BackupService: StorageMode, Can be 'off', 'on' or 'latest's (str)")
     parser.add_argument('-bs_backupLoc', dest="bs_backupLoc", help="BackupService: Where to store backups (str)")
     parser.add_argument('--bs_ping', dest="bs_ping", help="BackupService: If given pings the scoreboard (bool)",action="store_true")
+    parser.add_argument('-bs_pingMessage', dest="bs_pingMessage", help="BackupService: Adds a message to the ping (str)")
     parser.add_argument('-bs_interval', dest="bs_interval", help="BackupService: How often to schedule the service, <int>_<unit>, Example: 1_minutes (bool)")
     parser.add_argument('-bs_mode', dest="bs_mode", help="BackupService: Execution mode, can be: 'schedule', 'unschedule' or 'breakLoopExecute' (str)")
     parser.add_argument('-bs_pythonPathOverwrite', dest="bs_pythonPathOverwrite", help="BackupService: Optional python path overwrite (str)")
@@ -460,7 +474,7 @@ if __name__ == '__main__':
         print(ans)
     ## [BackupService]
     if args.bs_backupService:
-        ans = gamehub_backupService(apiConfPath=args.bs_apiConfPath,scoreboard=args.bs_scoreboard,backupStoreMode=args.bs_backupMode,backupStoreLocation=args.bs_backupLoc,ping=args.bs_ping,backupInterval=args.bs_interval,mode=args.bs_mode,pythonPathOverwrite=args.bs_pythonPathOverwrite,breakFilePath=args.bs_breakFilePath,serviceManagerFile=args.bs_serviceManagerFile)
+        ans = gamehub_backupService(apiConfPath=args.bs_apiConfPath,scoreboard=args.bs_scoreboard,backupStoreMode=args.bs_backupMode,backupStoreLocation=args.bs_backupLoc,ping=args.bs_ping,backupInterval=args.bs_interval,mode=args.bs_mode,pythonPathOverwrite=args.bs_pythonPathOverwrite,breakFilePath=args.bs_breakFilePath,serviceManagerFile=args.bs_serviceManagerFile,pingMessage=args.bs_pingMessage)
         print(ans)
     ## [SaveService]
     if args.ss_function:
