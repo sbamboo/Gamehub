@@ -35,22 +35,22 @@ class Manager():
             return scoreboard in basketNames
         else: return True
     # Creates a basket if it dosen't exists
-    def create(self,key,scoreboard=str(),json=None,doCheck=None):
+    def create(self,key,scoreboard=str(),jsonDict=None,doCheck=None):
         if doCheck == None: doCheck = self.doCheck_umb
         doesExist = self.doesExist(key,scoreboard=scoreboard,doCheck=doCheck)
         if doesExist != True:
-            if json != None:
-                ans = self.api(key, "POST", basket=scoreboard, body=json)
+            if jsonDict != None:
+                ans = self.api(key, "POST", basket=scoreboard, body=jsonDict)
             else:
                 ans = self.api(key, "POST", basket=scoreboard)
             return self.safeCast(ans)
     # Replaces a basket if it exists
-    def replace(self,key,scoreboard=str(),json=None,doCheck=None):
+    def replace(self,key,scoreboard=str(),jsonDict=None,doCheck=None):
         if doCheck == None: doCheck = self.doCheck_umb
         doesExist = self.doesExist(key,scoreboard=scoreboard,doCheck=doCheck)
         if doesExist == True:
-            if json != None:
-                ans = self.api(key, "POST", basket=scoreboard, body=json)
+            if jsonDict != None:
+                ans = self.api(key, "POST", basket=scoreboard, body=jsonDict)
             else:
                 ans = self.api(key, "POST", basket=scoreboard)
             return self.safeCast(ans)

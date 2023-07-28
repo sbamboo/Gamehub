@@ -360,7 +360,7 @@ def gamehub_getTOS(net=bool()):
 # Main function for handling a scoreboard from a function
 def gamehub_scoreboardFunc(
         encType=None,manager=None,apiKey=None,encKey=None,managerFile=None,ignoreManFormat=None,
-        _scoreboard=str(),jsonData=str(),
+        _scoreboard=str(),jsonData=dict(),
         create=False,replace=False,remove=False,get=False,append=False, doesExist=False
     ):
     # Create scoreboardConnector

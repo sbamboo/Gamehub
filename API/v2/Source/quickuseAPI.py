@@ -1,5 +1,5 @@
 # [Imports]
-import os,importlib.util,base64,subprocess,json,platform,sys,re
+import os,importlib.util,base64,subprocess,json,platform,sys,re,system
 
 # [Importa function]
 def fromPath(path):
@@ -121,7 +121,7 @@ def gamehub_singleSave_score(
     current = gh.gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], get=True)
     # Check
     if int(current[user]["score"]) < int(_dict["data"]["score"]):
-        _jsonData = json.dumps( {_dict["user"] : _dict["data"]} )
+        _jsonData = {_dict["user"] : _dict["data"]}
         gh.gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], jsonData=_jsonData, append=True)
 
 # Function to remove comments from json
@@ -152,9 +152,11 @@ class apiConfigScoreboardConnector(gh.scoreboardConnector):
         super().__init__(encryptionType=self.apiData["encType"], storageType=self.apiData["storageType"], key=self.apiData["apiKey"], kryptographyKey=self.apiData["encKey"], managersFile=self.apiData["managerFile"], ignoreManagerFormat=self.apiData["ignoreManagerFormat"])
 
 # wrapper for gamehubAsAFunction
-def apiConfig_gamehub_scoreboardFunc(apiConfPath,scoreboard=str(),jsonData=str(), create=False,remove=False,get=False,append=False, doesExist=False):
+def apiConfig_gamehub_scoreboardFunc(apiConfPath,scoreboard=str(),jsonData=None, create=False,remove=False,get=False,append=False,replace=False, doesExist=False, managerOverwrite=None):
     _d = getAPIConfig(apiConfPath)
-    return gh.gamehub_scoreboardFunc(encType=_d["encType"],manager=_d["storageType"],apiKey=_d["apiKey"],encKey=_d["encKey"],managerFile=_d["managerFile"],ignoreManFormat=_d["ignoreManagerFormat"],_scoreboard=scoreboard,jsonData=jsonData,create=create,remove=remove,get=get,append=append,doesExist=doesExist)
+    if managerOverwrite != None: _d["managerFile"] = managerOverwrite
+    if jsonData != None: jsonData = json.loads(jsonData)
+    return gh.gamehub_scoreboardFunc(encType=_d["encType"],manager=_d["storageType"],apiKey=_d["apiKey"],encKey=_d["encKey"],managerFile=_d["managerFile"],ignoreManFormat=_d["ignoreManagerFormat"],_scoreboard=scoreboard,jsonData=jsonData,create=create,remove=remove,get=get,append=append,replace=replace,doesExist=doesExist)
 
 # Function to prep a file for the saveService
 def saveServicePrep(linkedFile=str(),doEncrypt=True, scoreboard=str(),user=str(),data=dict()):
@@ -252,7 +254,7 @@ def gamehub_saveService_on(pyPath="python3",apiConfPath=str(),linkedFile=str(),e
         creation_flags = subprocess.CREATE_NEW_CONSOLE
     else: raise NotImplementedError(f'Unsupported operating system: {current_os}')
     # Setup command
-    command2 = [pyPath, f"{os.path.dirname(__file__)}\\internal_saveService\\service.py", "-apiConfpath", apiConfPath, "-linkedFile", linkedFile, "-exitFile", exitFile]
+    command2 = [pyPath, f"{os.path.dirname(__file__)}\\internal_services\\save\\service.py", "-apiConfpath", apiConfPath, "-linkedFile", linkedFile, "-exitFile", exitFile]
     if current_os == 'Darwin': command2.pop(0)
     for e in command2: command.append(e)
     if doEncrypt == True: command.append("--doEncrypt")
@@ -266,8 +268,73 @@ def gamehub_saveService_off(exitFile=str()):
     if os.path.exists(exitFile): os.remove(exitFile)
     open(exitFile,'w').write("1")
 
+# BackupSystem
+def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=str,apiConfPath=None,backupStoreMode="off",backupStoreLocation=None,ping=False,backupInterval=None,breakFilePath=None):
+    '''
+    mode: 'schedule' or 'unschedule' or 'breakLoopExecute'
+    pythonPathOverwrite: Overwriting python path
+    apiConfPath: Path to apiconfig provider file (to set which scoreboard to update)
+    scoreboard:  The scoreboard to backup/ping
+    backupStoreMode:
+        "off":    No backups are saved.
+        "on":     All backups are saved.
+        "latest": Only latest backup is saved.
 
+    backupStoreLocation: Where to store backups (if enabled by the StoreMode)
+    ping: Updates the scoreboard with some ping information, under key: 'GamehubBackupServicePing'
+    backupInterval: How often to schedule the service:
+        'Once':       Runs service once but dosen't schedule it.
+        < 1_minutes:  Asks you if you wan't to run loopExecute (Loops until CTRL+C or similar)
+        <int>_<unit>, Example: 1_minutes/24_Hours (Allowed units: minutes, hours, days, weeks, months)
+    breakFilePath: A path to a breakfile incase using loopExecute.
+    '''
+    # Unix message
+    if system.platform() != "Windows":
+        print("OBS! This functionality uses libschedule, on unix if a schedule dosen't run you should run unixSetup.py, look at documentation for this in: libs/libschedule/readme.txt!")
+        confirm = input("Have you read readme.txt and made neccesairy actions? [y/n] ")
+        if confirm.lower() != "y":
+            print("PLESE READ readme.txt! (Breaking...)")
+            break
+    # Variable Define
+    if pythonPathOverwrite != None:
+        python = pythonPathOverwrite
+    else:
+        python = sys.executable
+    parent = os.path.abspath(os.path.dirname(__file__))
+    service = f"{parent}{os.sep}internal_services{os.sep}backup{os.sep}service.py"
+    command = f'{service} -apiConfPath "{apiConfPath}" -scoreboard "{scoreboard}"'
+    cliWrapper = f"{parent}{os.sep}libs{os.sep}libschedule{os.sep}cliWrapper.py"
+    # Add non required variables
+    if backupStoreMode != None and backupStoreMode != "off":
+        command += f' -backupStoreMode "{backupStoreMode}"'
+    if backupStoreLocation != None and backupStoreLocation != "":
+        command += f' -backupStoreLocation "{backupStoreLocation}"'
+    if ping != None and ping != False:
+        command += f' --ping'
+    # Generate scheduleCommand
+    scommand = f'{cliWrapper} -task_name "{scoreboard}" -python_path "{python}" -script_path "{python}" -script_args "{command}"'
+    if breakFilePath != None and breakFilePath != "":
+        scommand += f' -break_file_path "{breakFilePath}"'
+    # execute service
+    if mode.lower() == "schedule":
+        # Once
+        if backupInterval.lower() == "once":
+            os.system(f"{python} {command}")
+        # Interval
+        else:
+            scommand += " --schedule"
+            os.system(scommand)
+    # Break loopExecute
+    elif mode.lower() == "breakloopexecute":
+        if os.path.exists(breakFilePath): os.remove(breakFilePath)
+        open(breakFilePath,"w").write("1")
+    # Unschedule
+    else:
+        scommand = f'{cliWrapper} -task_name "{scoreboard}" --unschedule'
+        os.system(scommand)
 
+        
+    
 # ========================================================[CLI Executor]========================================================
 if __name__ == '__main__':
     import argparse
@@ -279,6 +346,9 @@ if __name__ == '__main__':
     parser.add_argument('--singleSave', dest="qu_save", action='store_true', help="Uploads data saved with the prep function (EXPERIMENTAL)")
     parser.add_argument('--singleSave_score', dest="qu_savescore", action='store_true', help="Uploads data saved with the prep function but handles scores and uploads incrementaly (EXPERIMENTAL)")
     parser.add_argument('--apiConfScoreboardFunc', dest="qu_apiconfFunc", action='store_true', help="Wrapper for gamehubAPI's asFunction function but uses the APIconf system.")
+    parser.add_argument('--apiConfScoreboardFunc_ovmf', dest="qu_apiconfFunc_ovmf", action='store_true', help="Same as normal but takes a managerFormat argument to overwrite the apiConf one.")
+    ## [BackupService]
+    parser.add_argument('--backupService', dest="bs_backupService", action='store_true', help="Service for backing up scoreboards.")
     ## [SaveService]
     parser.add_argument('--saveServiceFunction', dest="ss_function", action='store_true', help="The main function that listens for updates and uploads them. (Import to create custom backgroundListener)")
     parser.add_argument('--saveServicePrep', dest="ss_prep", action='store_true', help="Prepare data to be uploaded by the listener. (saves it to temp)")
@@ -316,6 +386,16 @@ if __name__ == '__main__':
     parser.add_argument('--qu_remove', dest="qu_remove", action="store_true", help="QuickuseFuncs: remove method (bool)")
     parser.add_argument('--qu_get', dest="qu_get", action="store_true", help="QuickuseFuncs: get method (bool)")
     parser.add_argument('--qu_append', dest="qu_append", action="store_true", help="QuickuseFuncs: append method (bool)")
+    ## [BackupService]
+    parser.add_argument('-bs_apiConfPath', dest="bs_apiConfPath", help="BackupService: APIconf path (str)")
+    parser.add_argument('-bs_scoreboard', dest="bs_scoreboard", help="BackupService: Scoreboard to backup/ping (str)")
+    parser.add_argument('-bs_backupMode', dest="bs_backupMode", help="BackupService: StorageMode, Can be 'off', 'on' or 'latest's (str)")
+    parser.add_argument('-bs_backupLoc', dest="bs_backupLoc", help="BackupService: Where to store backups (str)")
+    parser.add_argument('--bs_ping', dest="bs_ping", help="BackupService: If given pings the scoreboard (bool)",action="store_true")
+    parser.add_argument('-bs_interval', dest="bs_interval", help="BackupService: How often to schedule the service, <int>_<unit>, Example: 1_minutes (bool)")
+    parser.add_argument('-bs_mode', dest="bs_mode", help="BackupService: Execution mode, can be: 'schedule', 'unschedule' or 'breakLoopExecute' (str)")
+    parser.add_argument('-bs_pythonPathOverwrite', dest="bs_pythonPathOverwrite", help="BackupService: Optional python path overwrite (str)")
+    parser.add_argument('-bs_breakFilePath', dest="bs_breakFilePath", help="BackupService: Path to breakfile incase using loopExecute (str)")
     ## [SaveService]
     parser.add_argument('-ss_apiConfPath', dest="ss_apiConfPath", help="SaveService: APIconf path (str)")
     parser.add_argument('-ss_linkedFile', dest="ss_linkedFile", help="SaveService: LinkedFile path (str)")
@@ -360,6 +440,19 @@ if __name__ == '__main__':
         print(ans)
     if args.qu_apiconfFunc:
         ans =  apiConfig_gamehub_scoreboardFunc(apiConfPath=args.qu_apiConfPath,scoreboard=args.qu_scoreboard,jsonData=args.qu_dictData, create=args.qu_create,replace=args.qu_replace,remove=args.qu_remove,get=args.qu_get,append=args.qu_append, doesExist=args.qu_doesExist)
+        print(ans)
+    if args.qu_apiconfFunc_ovmf:
+        # imf protcol for services 
+        if "§imf§:" in str(args.qu_dictData):
+            args.qu_dictData = args.qu_dictData.replace("§s§"," ")
+            args.qu_dictData = args.qu_dictData.replace("§q§","'")
+            args.qu_dictData = args.qu_dictData.replace("§Q§",'"')
+            args.qu_dictData = args.qu_dictData.replace("§imf§:","")
+        ans =  apiConfig_gamehub_scoreboardFunc(apiConfPath=args.qu_apiConfPath,scoreboard=args.qu_scoreboard,jsonData=args.qu_dictData, create=args.qu_create,replace=args.qu_replace,remove=args.qu_remove,get=args.qu_get,append=args.qu_append, doesExist=args.qu_doesExist, managerOverwrite=args.qu_managerFile)
+        print(ans)
+    ## [BackupService]
+    if args.bs_backupService:
+        ans = gamehub_backupService(apiConfPath=args.bs_apiConfPath,scoreboard=args.bs_scoreboard,backupStoreMode=args.bs_backupMode,backupStoreLocation=args.bs_backupLoc,ping=args.bs_ping,backupInterval=args.bs_interval,mode=args.bs_mode,pythonPathOverwrite=args.bs_pythonPathOverwrite,breakFilePath=args.bs_breakFilePath)
         print(ans)
     ## [SaveService]
     if args.ss_function:
