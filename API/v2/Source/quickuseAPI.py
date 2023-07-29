@@ -353,8 +353,11 @@ def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=st
         scommand = f'{python} {cliWrapper} -task_name "{scoreboard}" --unschedule'
         os.system(scommand)
 
-# TODO: Function that takes only apiConfFile and scoreboard and auto 20days it
-# TODO: Function that takes only scoreboard and unschedules it
+def gamehub_backupService_auto20Days(apiConfPath,scoreboard,ping=False,loc=os.path.join(os.path.abspath(parentDir), f"internal_services{os.sep}backup{os.sep}backups")):
+    if os.path.exists(loc) != True: os.mkdir(loc)
+    gamehub_backupService(scoreboard=scoreboard,apiConfPath=apiConfPath,backupStoreMode="latest",backupStoreLocation=loc,ping=ping,backupInterval="20_days",serviceManagerFile=True,pingMessage="Auto20")
+def gamehub_backupService_quickUnshedule(apiConfPath,scoreboard):
+    gamehub_backupService(mode="unschedule",apiConfPath=apiConfPath,scoreboard=scoreboard)
 # TODO: Add restoreFromLatestBackup and the ability to autoDetect removal and autoRestore to the gamehub_backupService function
     
 # ========================================================[CLI Executor]========================================================
@@ -371,6 +374,8 @@ if __name__ == '__main__':
     parser.add_argument('--apiConfScoreboardFunc_ovmf', dest="qu_apiconfFunc_ovmf", action='store_true', help="Same as normal but takes a managerFormat argument to overwrite the apiConf one.")
     ## [BackupService]
     parser.add_argument('--backupService', dest="bs_backupService", action='store_true', help="Service for backing up scoreboards.")
+    parser.add_argument('--backupServiceAuto20', dest="bs_backupServiceA20", action='store_true', help="Auto 20days scheduler.")
+    parser.add_argument('--backupServiceUnshedule', dest="bs_backupServiceUnshedule", action='store_true', help="Auto 20days scheduler.")
     ## [SaveService]
     parser.add_argument('--saveServiceFunction', dest="ss_function", action='store_true', help="The main function that listens for updates and uploads them. (Import to create custom backgroundListener)")
     parser.add_argument('--saveServicePrep', dest="ss_prep", action='store_true', help="Prepare data to be uploaded by the listener. (saves it to temp)")
@@ -477,6 +482,18 @@ if __name__ == '__main__':
     ## [BackupService]
     if args.bs_backupService:
         ans = gamehub_backupService(apiConfPath=args.bs_apiConfPath,scoreboard=args.bs_scoreboard,backupStoreMode=args.bs_backupMode,backupStoreLocation=args.bs_backupLoc,ping=args.bs_ping,backupInterval=args.bs_interval,mode=args.bs_mode,pythonPathOverwrite=args.bs_pythonPathOverwrite,breakFilePath=args.bs_breakFilePath,serviceManagerFile=args.bs_serviceManagerFile,pingMessage=args.bs_pingMessage)
+        print(ans)
+    if args.bs_backupServiceA20:
+        _ping = False
+        if args.bs_ping != None:
+            _ping = True
+        _backupLoc = os.path.join(os.path.abspath(parentDir), f"internal_services{os.sep}backup{os.sep}backups")
+        if args.bs_backupLoc != None:
+            _backupLoc = args.bs_backupLoc
+        ans = gamehub_backupService_auto20Days(apiConfPath=args.bs_apiConfPath, scoreboard=args.bs_scoreboard,ping=_ping,loc=_backupLoc)
+        print(ans)
+    if args.bs_backupServiceUnshedule:
+        ans = gamehub_backupService_quickUnshedule(apiConfPath=args.bs_apiConfPath, scoreboard=args.bs_scoreboard)
         print(ans)
     ## [SaveService]
     if args.ss_function:
