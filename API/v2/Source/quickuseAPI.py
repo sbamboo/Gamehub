@@ -353,7 +353,9 @@ def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=st
         scommand = f'{python} {cliWrapper} -task_name "{scoreboard}" --unschedule'
         os.system(scommand)
 
-        
+# TODO: Function that takes only apiConfFile and scoreboard and auto 20days it
+# TODO: Function that takes only scoreboard and unschedules it
+# TODO: Add restoreFromLatestBackup and the ability to autoDetect removal and autoRestore to the gamehub_backupService function
     
 # ========================================================[CLI Executor]========================================================
 if __name__ == '__main__':
