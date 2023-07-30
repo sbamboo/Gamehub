@@ -70,7 +70,7 @@ if args.backupStoreMode != "off" and args.backupStoreMode != None:
             if os.path.exists(filename_we): os.remove(filename_we)
             open(filename_we,'w').write(output)
         else:
-            filename = f"{timestamp}_{scoreboard}"
+            filename = f"{scoreboard}_{timestamp}"
             filename_we = f"{loc}{filename}.json"
             i = 1
             while os.path.exists(filename_we) == True:

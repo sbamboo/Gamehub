@@ -1,5 +1,7 @@
 # [Imports]
 import os,importlib.util,base64,subprocess,json,platform,sys,re,platform
+from datetime import datetime
+from scandir import scandir
 
 # [Importa function]
 def fromPath(path):
@@ -21,6 +23,41 @@ exec(base64.b64decode("aW1wb3J0IGdldHBhc3MKaW1wb3J0IHNvY2tldAppbXBvcnQgZGF0ZXRpb
 libhasher = fromPath(f"{parentDir}{os.sep}libs{os.sep}libhasher.py")
 hashFile = libhasher.hashFile
 hashString = libhasher.hashString
+
+# [SubFunctions]
+# Filesys scantree function
+def _scantree(path=str()):
+    try:
+        for entry in scandir(path):
+            if entry.is_dir(follow_symlinks=False):
+                yield from filesys.scantree(entry.path)
+            else:
+                yield entry
+    except:
+        pass
+def _filterBackupServiceFiles(filesList):
+    matchingFiles = []
+    for file in filesList:
+        # Match the file name using regular expressions
+        match = re.match(r"^(.+)_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}(?:_\d+)?\.json$", file)
+        if match:
+            matchingFiles.append(file)
+    return matchingFiles
+def _latestFile(filesList):
+    if filesList == None: return None
+    currentTime = datetime.now()
+    latestFile = None
+    latestDatetime = None
+    for file in filesList:
+        try:
+            fileDatetime = datetime.strptime(file, "%Y-%m-%d_%H-%M-%S")
+            if fileDatetime > latestDatetime:
+                latestFile = file
+                latestDatetime = fileDatetime
+        # If the file has an invalid format, ignore it
+        except ValueError:
+            pass
+    return latestFile
 
 # Function to handle userData
 def gamehub_userData(
@@ -272,7 +309,7 @@ def gamehub_saveService_off(exitFile=str()):
 # BackupSystem
 def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=str,apiConfPath=None,backupStoreMode="off",backupStoreLocation=None,ping=False,backupInterval=None,breakFilePath=None,serviceManagerFile=None,pingMessage=None):
     '''
-    mode: 'schedule' or 'unschedule' or 'breakLoopExecute'
+    mode: 'schedule' or 'unschedule' or 'breakLoopExecute' or 'restoreLatest'
     pythonPathOverwrite: Overwriting python path
     apiConfPath: Path to apiconfig provider file (to set which scoreboard to update)
     scoreboard:  The scoreboard to backup/ping
@@ -348,6 +385,18 @@ def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=st
     elif mode.lower() == "breakloopexecute":
         if os.path.exists(breakFilePath): os.remove(breakFilePath)
         open(breakFilePath,"w").write("1")
+    # Restore latest backup
+    elif mode.lower() == "restoreLatest":
+        if backupStoreLocation != None:
+            currentBackupFiles = _scantree(backupStoreLocation)
+            if backupStoreMode == "on":
+                currentBackupFiles_filtered = _filterBackupServiceFiles(currentBackupFiles)
+                latestFile = _latestFile(currentBackupFiles_filtered)
+            elif backupStoreMode == "off":
+                pass
+                # Get _latest file independing on filename and set as latestFile
+            # get json and deserialize to a dictionary
+            # now accually send the gamehubAPI request to replace the dictionary
     # Unschedule
     else:
         scommand = f'{python} {cliWrapper} -task_name "{scoreboard}" --unschedule'
@@ -356,10 +405,11 @@ def gamehub_backupService(mode="schedule",pythonPathOverwrite=None,scoreboard=st
 def gamehub_backupService_auto20Days(apiConfPath,scoreboard,ping=False,loc=os.path.join(os.path.abspath(parentDir), f"internal_services{os.sep}backup{os.sep}backups")):
     if os.path.exists(loc) != True: os.mkdir(loc)
     gamehub_backupService(scoreboard=scoreboard,apiConfPath=apiConfPath,backupStoreMode="latest",backupStoreLocation=loc,ping=ping,backupInterval="20_days",serviceManagerFile=True,pingMessage="Auto20")
+
 def gamehub_backupService_quickUnshedule(apiConfPath,scoreboard):
     gamehub_backupService(mode="unschedule",apiConfPath=apiConfPath,scoreboard=scoreboard)
 # TODO: Add restoreFromLatestBackup and the ability to autoDetect removal and autoRestore to the gamehub_backupService function
-    
+
 # ========================================================[CLI Executor]========================================================
 if __name__ == '__main__':
     import argparse
