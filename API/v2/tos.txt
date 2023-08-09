@@ -17,7 +17,7 @@ Basket = A scoreboard instance and/or scoreboard on ex: pantry.
  
  5. Since this is a closed beta, I (the author of gamehub) remain in a position where I can request you to allow me access to update and/or remove the closed beta from your computer and access. 
  
- 6. I (the author of gamehub) Remain in a position where I may change and update the terms of use. And whilst I should do my best at informing you (the user) of a TOS changes. You should take your responsibility to check the TOS on the link: "https://raw.githubusercontent.com/sbamboo/CrossShell/main/assets/gamehub_api_tos.txt". If you (the user) no longer want to accept the TOS please inform me and stop using the gamehub services. In other words, I may change the TOS and you would automatically (by using the service) agree to the new TOS, and if not contact me and stop using gamehub.
+ 6. I (the author of gamehub) Remain in a position where I may change and update the terms of use. And whilst I should do my best at informing you (the user) of a TOS changes. You should take your responsibility to check the TOS on the link: "https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/tos.txt". If you (the user) no longer want to accept the TOS please inform me and stop using the gamehub services. In other words, I may change the TOS and you would automatically (by using the service) agree to the new TOS, and if not contact me and stop using gamehub.
  
  7. You (the user) remain within the right to disagree to the TOS, but keep in mind that you are only allowed to use gamehub when you have agreed to the TOS.
 
