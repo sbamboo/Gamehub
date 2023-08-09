@@ -236,7 +236,7 @@ class scoreboardConnector():
         '''
         # Variables
         self.parentPath = os.path.dirname(__file__)
-        self.managerFormat = [3, "https://sbamboo.github.io/websa/Gamehub/API/v2/docs/managers/format3.html",[2]]
+        self.managerFormat = [3, "https://sbamboo.github.io/websa/docview/?markdown=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/managers/format3.md&css=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/managers/docs.css&json=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/docview_files.json",[2]]
         self.doCheckExistance = doCheckExistance
         self.autoHandlePingRemoval = autoHandlePingRemoval
         # Manager file
