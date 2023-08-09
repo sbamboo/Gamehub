@@ -223,7 +223,7 @@ class scoreboardConnector():
             managers[manager] = {"module":fromPath(managers_dict[manager]["path"]),"needKey":managers_dict[manager]["needKey"]}
         return managers
     # Initator
-    def __init__(self, encryptionType=None, storageType=None, key=None, kryptographyKey=None, managersFile=None, ignoreManagerFormat=False, doCheckExistance=None):
+    def __init__(self, encryptionType=None, storageType=None, key=None, kryptographyKey=None, managersFile=None, ignoreManagerFormat=False, doCheckExistance=None, autoHandlePingRemoval=True):
         '''
         encryptionType: "aes" or "legacy" or "None"
         storegeType: "pantry"
@@ -232,11 +232,13 @@ class scoreboardConnector():
         managersFile is if you want to load dynamicManagers
         ignoreManagerFormat is used if you want to ignore a managers format
         doCheckExistance if set to True, wont check scoreboard existance (Less requests sent but less safe) NOTE WILL GET SENT EVEN TO UNSUPPORTING MANAGER, SO DONT SET TO TRUE IF YOUR MANAGER DOESN'T SUPPORT IT
+        autoHandlePingRemoval: if set to true, runs the output data through a filter removing any BackupService-Ping data, this to ensure compatability.
         '''
         # Variables
         self.parentPath = os.path.dirname(__file__)
         self.managerFormat = [3, "https://sbamboo.github.io/websa/Gamehub/API/v2/docs/managers/format3.html",[2]]
         self.doCheckExistance = doCheckExistance
+        self.autoHandlePingRemoval = autoHandlePingRemoval
         # Manager file
         if managersFile == "GLOBAL":
             managersFile = f"{self.parentPath}{os.sep}managers.jsonc"
@@ -279,27 +281,55 @@ class scoreboardConnector():
                 self.key = key
         else:
             self.key = None
+    # RemovePink
+    def _filterPing(self,jsonDict=None):
+        if jsonDict != None and type(jsonDict) == dict and self.autoHandlePingRemoval == True:
+            if jsonDict.get("GamehubBackupServicePing") != None:
+                jsonDict.pop("GamehubBackupServicePing")
+        return jsonDict
     # Method functions
     def create(self,scoreboard=str(),jsonDict=None,doCheck=None):
-        if doCheck == None: return self.storageManager.create(self.key,scoreboard,jsonDict)
-        else:               return self.storageManager.create(self.key,scoreboard,jsonDict,doCheck=doCheck)
+        if doCheck == None:
+            returnData = self.storageManager.create(self.key,scoreboard,jsonDict)
+        else:
+            returnData = self.storageManager.create(self.key,scoreboard,jsonDict,doCheck=doCheck)
+        # Return
+        return self._filterPing(returnData)
     def replace(self,scoreboard=str(),jsonDict=None,doCheck=None):
-        if doCheck == None: return self.storageManager.replace(self.key,scoreboard,jsonDict)
-        else:               return self.storageManager.replace(self.key,scoreboard,jsonDict,doCheck=doCheck)
+        if doCheck == None:
+            returnData = self.storageManager.replace(self.key,scoreboard,jsonDict)
+        else:
+            returnData = self.storageManager.replace(self.key,scoreboard,jsonDict,doCheck=doCheck)
+        # Return
+        return self._filterPing(returnData)
     def remove(self,scoreboard=str(),doCheck=None):
-        if doCheck == None: return self.storageManager.remove(self.key,scoreboard)
-        else:               return self.storageManager.remove(self.key,scoreboard,doCheck=doCheck)
+        if doCheck == None:
+            returnData = self.storageManager.remove(self.key,scoreboard)
+        else:
+            returnData = self.storageManager.remove(self.key,scoreboard,doCheck=doCheck)
+        # Return
+        return self._filterPing(returnData)
     def get(self,scoreboard=str()):
-        return self.storageManager.get(self.key,scoreboard)
+        returnData = self.storageManager.get(self.key,scoreboard)
+        # Return
+        return self._filterPing(returnData)
     def append(self,scoreboard=str(),jsonDict=dict()):
-        return self.storageManager.append(self.key,scoreboard,jsonDict)
+        returnData = self.storageManager.append(self.key,scoreboard,jsonDict)
+        # Return
+        return self._filterPing(returnData)
     def doesExist(self,scoreboard=str()) -> bool:
-        return self.storageManager.doesExist(self.key,scoreboard)
+        returnData = self.storageManager.doesExist(self.key,scoreboard)
+        # Return
+        return self._filterPing(returnData)
     # Mapped methods
     def EncDec(self,string,mode):
-        return self.encdec(key=self.kryptokey,inputs=string,mode=mode)
+        returnData = self.encdec(key=self.kryptokey,inputs=string,mode=mode)
+        # Return
+        return self._filterPing(returnData)
     def EncDecDict(self,_dict,mode):
-        return self.encdec_dict(key=self.kryptokey,dictionary=_dict,mode=mode)
+        returnData = self.encdec_dict(key=self.kryptokey,dictionary=_dict,mode=mode)
+        # Return
+        return self._filterPing(returnData)
 
 class experimental_linkedDictionary():
     # INIT
