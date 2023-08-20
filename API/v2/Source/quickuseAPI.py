@@ -64,9 +64,10 @@ def gamehub_userData(
         encType=None,manager=None,apiKey=None,encKey=None,managerFile=None,ignoreManFormat=None,
         scoreboard=str(),user=None,dictData=None,
         saveUser=False,getUser=False,updateUser=False,getAllUsers=False, doesExist=False,mRemove=False,
+        doCheckExistance=None, autoHandlePingRemoval=True, autoFindGlobalManagerFile=True
     ):
     # Create scoreboardConnector
-    scoreboard = gh.scoreboardConnector(encryptionType=encType, storageType=manager, key=apiKey, kryptographyKey=encKey, managersFile=managerFile, ignoreManagerFormat=ignoreManFormat)
+    scoreboard = gh.scoreboardConnector(encryptionType=encType, storageType=manager, key=apiKey, kryptographyKey=encKey, managersFile=managerFile, ignoreManagerFormat=ignoreManFormat, doCheckExistance=doCheckExistance, autoHandlePingRemoval=autoHandlePingRemoval, autoFindGlobalManagerFile=autoFindGlobalManagerFile)
     # Actions
     if saveUser == True:
         if user != None and dictData != None:
@@ -122,7 +123,8 @@ def gamehub_singleSavePrep(
 # Function to load and upload an existing file
 def gamehub_singleSave(
         encType=None,manager=None,apiKey=None,encKey=None,managerFile=None,ignoreManFormat=None,
-        tempFolder=str(),fileName=str(), encrypt=True
+        tempFolder=str(),fileName=str(), encrypt=True,
+        doCheckExistance=None, autoHandlePingRemoval=True, autoFindGlobalManagerFile=True
     ):
     if encrypt == True:
         securityLevel = 2
@@ -137,11 +139,12 @@ def gamehub_singleSave(
     _encKey = None
     # Update data
     _jsonData = json.loads( {_dict["user"] : _dict["data"]} )
-    gh.gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], jsonData=_jsonData, append=True)
+    gh.gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], jsonData=_jsonData, append=True, doCheckExistance=doCheckExistance,autoHandlePingRemoval=autoHandlePingRemoval,autoFindGlobalManagerFile=autoFindGlobalManagerFile)
 # Function to load and upload an existing file (SCORE)
 def gamehub_singleSave_score(
         encType=None,manager=None,apiKey=None,encKey=None,managerFile=None,ignoreManFormat=None,
-        tempFolder=str(),fileName=str(), encrypt=True
+        tempFolder=str(),fileName=str(), encrypt=True,
+        doCheckExistance=None, autoHandlePingRemoval=True, autoFindGlobalManagerFile=True
     ):
     if encrypt == True:
         securityLevel = 2
@@ -156,11 +159,11 @@ def gamehub_singleSave_score(
     _encKey = None
     user = _dict["user"]
     # Get Current Data
-    current = gh.gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], get=True)
+    current = gh.gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], get=True, doCheckExistance=doCheckExistance,autoHandlePingRemoval=autoHandlePingRemoval,autoFindGlobalManagerFile=autoFindGlobalManagerFile)
     # Check
     if int(current[user]["score"]) < int(_dict["data"]["score"]):
         _jsonData = {_dict["user"] : _dict["data"]}
-        gh.gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], jsonData=_jsonData, append=True)
+        gh.gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], jsonData=_jsonData, append=True, doCheckExistance=doCheckExistance,autoHandlePingRemoval=autoHandlePingRemoval,autoFindGlobalManagerFile=autoFindGlobalManagerFile)
 
 # Function to remove comments from json
 def removeComments(json_string):
@@ -185,16 +188,16 @@ def getAPIConfig(apiConfPath=str()) -> dict:
 
 # ScoreboardConnector
 class apiConfigScoreboardConnector(gh.scoreboardConnector):
-    def __init__(self,apiConfPath=str()):
+    def __init__(self,apiConfPath=str(), doCheckExistance=None, autoHandlePingRemoval=True, autoFindGlobalManagerFile=True):
         self.apiData = getAPIConfig(apiConfPath)
-        super().__init__(encryptionType=self.apiData["encType"], storageType=self.apiData["storageType"], key=self.apiData["apiKey"], kryptographyKey=self.apiData["encKey"], managersFile=self.apiData["managerFile"], ignoreManagerFormat=self.apiData["ignoreManagerFormat"])
+        super().__init__(encryptionType=self.apiData["encType"], storageType=self.apiData["storageType"], key=self.apiData["apiKey"], kryptographyKey=self.apiData["encKey"], managersFile=self.apiData["managerFile"], ignoreManagerFormat=self.apiData["ignoreManagerFormat"],doCheckExistance=doCheckExistance,autoHandlePingRemoval=autoHandlePingRemoval,autoFindGlobalManagerFile=autoFindGlobalManagerFile)
 
 # wrapper for gamehubAsAFunction
-def apiConfig_gamehub_scoreboardFunc(apiConfPath,scoreboard=str(),jsonData=None, create=False,remove=False,get=False,append=False,replace=False, doesExist=False, managerOverwrite=None):
+def apiConfig_gamehub_scoreboardFunc(apiConfPath,scoreboard=str(),jsonData=None, create=False,remove=False,get=False,append=False,replace=False, doesExist=False, managerOverwrite=None, doCheckExistance=None, autoHandlePingRemoval=True, autoFindGlobalManagerFile=True):
     _d = getAPIConfig(apiConfPath)
     if managerOverwrite != None: _d["managerFile"] = managerOverwrite
     if jsonData != None: jsonData = json.loads(jsonData)
-    return gh.gamehub_scoreboardFunc(encType=_d["encType"],manager=_d["storageType"],apiKey=_d["apiKey"],encKey=_d["encKey"],managerFile=_d["managerFile"],ignoreManFormat=_d["ignoreManagerFormat"],_scoreboard=scoreboard,jsonData=jsonData,create=create,remove=remove,get=get,append=append,replace=replace,doesExist=doesExist)
+    return gh.gamehub_scoreboardFunc(encType=_d["encType"],manager=_d["storageType"],apiKey=_d["apiKey"],encKey=_d["encKey"],managerFile=_d["managerFile"],ignoreManFormat=_d["ignoreManagerFormat"],_scoreboard=scoreboard,jsonData=jsonData,create=create,remove=remove,get=get,append=append,replace=replace,doesExist=doesExist,doCheckExistance=doCheckExistance,autoHandlePingRemoval=autoHandlePingRemoval,autoFindGlobalManagerFile=autoFindGlobalManagerFile)
 
 # Function to prep a file for the saveService
 def saveServicePrep(linkedFile=str(),doEncrypt=True, scoreboard=str(),user=str(),data=dict()):
@@ -463,6 +466,9 @@ if __name__ == '__main__':
     parser.add_argument('--qu_remove', dest="qu_remove", action="store_true", help="QuickuseFuncs: remove method (bool)")
     parser.add_argument('--qu_get', dest="qu_get", action="store_true", help="QuickuseFuncs: get method (bool)")
     parser.add_argument('--qu_append', dest="qu_append", action="store_true", help="QuickuseFuncs: append method (bool)")
+    parser.add_argument('--qu_doCheckExistance', dest="qu_doCheckExistance", action="store_true", help="QuickuseFuncs: doCheckExistance flag (bool)")
+    parser.add_argument('--qu_autoHandlePingRemoval', dest="qu_autoHandlePingRemoval", action="store_true", help="QuickuseFuncs: autoHandlePingRemoval flag (bool)")
+    parser.add_argument('--qu_autoFindGlobalManagerFile', dest="qu_autoFindGlobalManagerFile", action="store_true", help="QuickuseFuncs: autoFindGlobalManagerFile flag (bool)")
     ## [BackupService]
     parser.add_argument('-bs_apiConfPath', dest="bs_apiConfPath", help="BackupService: APIconf path (str)")
     parser.add_argument('-bs_scoreboard', dest="bs_scoreboard", help="BackupService: Scoreboard to backup/ping (str)")
@@ -500,7 +506,8 @@ if __name__ == '__main__':
         ans =  gamehub_userData(
             encType=args.qu_encType,manager=args.qu_manager,apiKey=args.qu_apiKey,encKey=args.qu_encKey,managerFile=args.qu_managerFile,ignoreManFormat=args.qu_ignoreManFormat,
             scoreboard=args.qu_scoreboard,user=args.qu_user,dictData=json.loads(args.qu_dictData),
-            saveUser=args.qu_saveUser,getUser=args.qu_getUser,updateUser=args.qu_updateUser,getAllUsers=args.qu_getAllUsers, doesExist=args.qu_doesExist,mRemove=args.qu_mRemoves
+            saveUser=args.qu_saveUser,getUser=args.qu_getUser,updateUser=args.qu_updateUser,getAllUsers=args.qu_getAllUsers, doesExist=args.qu_doesExist,mRemove=args.qu_mRemoves,
+            doCheckExistance=args.qu_doCheckExistance,autoHandlePingRemoval=args.qu_autoHandlePingRemoval,autoFindGlobalManagerFile=args.qu_autoFindGlobalManagerFile
         )
         print(ans)
     if args.qu_prep:
@@ -508,17 +515,21 @@ if __name__ == '__main__':
     if args.qu_save:
         ans =  gamehub_singleSave(
         encType=args.qu_encType,manager=args.qu_manager,apiKey=args.qu_apiKey,encKey=args.qu_encKey,managerFile=args.qu_managerFile,ignoreManFormat=args.qu_ignoreManFormat,
-        tempFolder=args.qu_tempFolder,fileName=args.qu_fileName, encrypt=args.qu_encrypt
+        tempFolder=args.qu_tempFolder,fileName=args.qu_fileName, encrypt=args.qu_encrypt,
+        doCheckExistance=args.qu_doCheckExistance,autoHandlePingRemoval=args.qu_autoHandlePingRemoval,autoFindGlobalManagerFile=args.qu_autoFindGlobalManagerFile
         )
         print(ans)
     if args.qu_savescore:
         ans =  gamehub_singleSave_score(
         encType=args.qu_encType,manager=args.qu_manager,apiKey=args.qu_apiKey,encKey=args.qu_encKey,managerFile=args.qu_managerFile,ignoreManFormat=args.qu_ignoreManFormat,
-        tempFolder=args.qu_tempFolder,fileName=args.qu_fileName, encrypt=args.qu_encrypt
+        tempFolder=args.qu_tempFolder,fileName=args.qu_fileName, encrypt=args.qu_encrypt,
+        doCheckExistance=args.qu_doCheckExistance,autoHandlePingRemoval=args.qu_autoHandlePingRemoval,autoFindGlobalManagerFile=args.qu_autoFindGlobalManagerFile
         )
         print(ans)
     if args.qu_apiconfFunc:
-        ans =  apiConfig_gamehub_scoreboardFunc(apiConfPath=args.qu_apiConfPath,scoreboard=args.qu_scoreboard,jsonData=args.qu_dictData, create=args.qu_create,replace=args.qu_replace,remove=args.qu_remove,get=args.qu_get,append=args.qu_append, doesExist=args.qu_doesExist)
+        ans =  apiConfig_gamehub_scoreboardFunc(apiConfPath=args.qu_apiConfPath,scoreboard=args.qu_scoreboard,jsonData=args.qu_dictData, create=args.qu_create,replace=args.qu_replace,remove=args.qu_remove,get=args.qu_get,append=args.qu_append, doesExist=args.qu_doesExist,
+                doCheckExistance=args.qu_doCheckExistance,autoHandlePingRemoval=args.qu_autoHandlePingRemoval,autoFindGlobalManagerFile=args.qu_autoFindGlobalManagerFile
+               )
         print(ans)
     if args.qu_apiconfFunc_ovmf:
         # imf protcol for services 
@@ -527,7 +538,9 @@ if __name__ == '__main__':
             args.qu_dictData = args.qu_dictData.replace("§q§","'")
             args.qu_dictData = args.qu_dictData.replace("§Q§",'"')
             args.qu_dictData = args.qu_dictData.replace("§imf§:","")
-        ans =  apiConfig_gamehub_scoreboardFunc(apiConfPath=args.qu_apiConfPath,scoreboard=args.qu_scoreboard,jsonData=args.qu_dictData, create=args.qu_create,replace=args.qu_replace,remove=args.qu_remove,get=args.qu_get,append=args.qu_append, doesExist=args.qu_doesExist, managerOverwrite=args.qu_managerFile)
+        ans =  apiConfig_gamehub_scoreboardFunc(apiConfPath=args.qu_apiConfPath,scoreboard=args.qu_scoreboard,jsonData=args.qu_dictData, create=args.qu_create,replace=args.qu_replace,remove=args.qu_remove,get=args.qu_get,append=args.qu_append, doesExist=args.qu_doesExist, managerOverwrite=args.qu_managerFile,
+                doCheckExistance=args.qu_doCheckExistance,autoHandlePingRemoval=args.qu_autoHandlePingRemoval,autoFindGlobalManagerFile=args.qu_autoFindGlobalManagerFile
+               )
         print(ans)
     ## [BackupService]
     if args.bs_backupService:

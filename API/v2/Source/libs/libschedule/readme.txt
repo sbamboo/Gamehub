@@ -1,6 +1,7 @@
 Libschedule is a scheduling library made by Simon Kalmi Claesson
-Version: 1.0
-ReleaseDate: 2023-07-28
+Version: 1.1
+ReleaseDate: 2023-07-21
+Changelog: Fixed scheduling on unix-like systems!
 
 UNIX:
   On unix systems if shedules does not run, please run unixSetup.py as a sudo-user or run:
@@ -9,6 +10,7 @@ UNIX:
   to ensure that cron is running
   you might also have to run:
   $ chmod +x <scriptYouScheduled>
+  Note! ON UNIX MONTH INTERVALS MUST BE BETWEEN 0 AND 12!!!
 
 Information Agent:
   To get information about currently running tasks run info.py
@@ -34,3 +36,4 @@ Dependencies (pip):
 Other files:
   tasks.json: Internal list of tasks, DONT TUTCH!
   _winSchedule.py: Helper file containg code to generate the XML format needed for the windows Task Scheduler
+  _crontabExpressionGenerator.py: Helper for handling crontab intervals

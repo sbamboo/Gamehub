@@ -12,6 +12,7 @@ import platform
 import json
 from crontab import CronTab
 from _winSchedule import _parse_interval_and_schedule_task_win
+from _crontabExpressionGenerator import generate_cron_expression as crontab_expression_generator
 
 parentPath = os.path.abspath(os.path.dirname(__file__))
 tasks_file = os.path.join( os.path.abspath(os.path.dirname(__file__)), "tasks.json" )
@@ -41,7 +42,7 @@ def parse_interval_and_generate_schedule(task_name=str, interval_str=str, script
     if platform.system() == "Windows":
         _parse_interval_and_schedule_task_win(task_name, interval_str, script_path, script_args, python_path, python_args, break_file_path)
     elif platform.system() == "Linux" or platform.system() == "Darwin":  # Unix-like systems
-        _generate_cron_schedule(task_name, interval_int, time_unit_in_seconds, script_path, script_args, python_path, python_args, break_file_path)
+        _generate_cron_schedule(task_name, interval_int, interval_str, time_unit_in_seconds, script_path, script_args, python_path, python_args, break_file_path)
     else:
         print("Unsupported platform. Only Windows, Linux, and macOS are supported.")
 
@@ -57,7 +58,7 @@ def _parse_interval_string(interval_str):
     return interval_int, time_unit_in_seconds
 
 # Generate a schedule file for the cron library using the 'crontab' python modules.
-def _generate_cron_schedule(task_name=str, interval_int=int, time_unit_in_seconds=int, script_path=str, script_args="", python_path=str, python_args="", break_file_path=None):
+def _generate_cron_schedule(task_name=str, interval_int=int, interval_str=str, time_unit_in_seconds=int, script_path=str, script_args="", python_path=str, python_args="", break_file_path=None):
     # To short interval?
     minutes = interval_int * (time_unit_in_seconds // 60)
     if minutes < 1:
@@ -68,7 +69,7 @@ def _generate_cron_schedule(task_name=str, interval_int=int, time_unit_in_second
             raise ValueError("Interval is too short for Task Scheduler. Try again and start a loopExecutionCycle for smaller intervals.")
     else:
         # Convert to cron expression
-        cron_expression = _calculate_cron_expression(interval_int, time_unit_in_seconds)
+        cron_expression = crontab_expression_generator(interval_int, interval_str)
         command = str(python_path)
         if python_args != None: command += f" {python_args}"
         if script_path != None: command += f" {script_path}"

@@ -10,7 +10,7 @@ def fromPath(path):
     spec.loader.exec_module(module)
     return module
 
-# Dynnamic imports
+# Dynamic imports
 libhasher = fromPath(f"{parentPath}{os.sep}libs{os.sep}libhasher.py")
 hashFile = libhasher.hashFile
 hashString = libhasher.hashString
@@ -215,30 +215,36 @@ def formatIsCompat(hostFormat=list,manFormat=list) -> bool:
 class scoreboardConnector():
     # Functions/Code for dynamic imports
     @staticmethod
-    def GetDynamicImports(managersFile=str()):
-        managersRaw = open(managersFile,'r').read()
-        managers_dict = json.loads(managersRaw)
+    def GetDynamicImports(managersFile=str(),rawData=None):
+        if rawData != None:
+            if isinstance(rawData, dict) != True: raise TypeError("If rawData is defined it must be of type dict!")
+            managers_dict = rawData
+        else:
+            managersRaw = open(managersFile,'r').read()
+            managers_dict = json.loads(managersRaw)
         managers = dict()
         for manager in list(managers_dict.keys()):
             managers[manager] = {"module":fromPath(managers_dict[manager]["path"]),"needKey":managers_dict[manager]["needKey"]}
         return managers
     # Initator
-    def __init__(self, encryptionType=None, storageType=None, key=None, kryptographyKey=None, managersFile=None, ignoreManagerFormat=False, doCheckExistance=None, autoHandlePingRemoval=True):
+    def __init__(self, encryptionType=None, storageType=None, key=None, kryptographyKey=None, managersFile=None, ignoreManagerFormat=False, doCheckExistance=None, autoHandlePingRemoval=True, autoFindGlobalManagerFile=True):
         '''
         encryptionType: "aes" or "legacy" or "None"
         storegeType: "pantry"
         key should only be supplied if the storageType needs it
         kryptographyKey should only be supplied if encryptionType needs it
-        managersFile is if you want to load dynamicManagers
+        managersFile is if you want to load dynamicManagers, if not use 'GLOBAL'
         ignoreManagerFormat is used if you want to ignore a managers format
         doCheckExistance if set to True, wont check scoreboard existance (Less requests sent but less safe) NOTE WILL GET SENT EVEN TO UNSUPPORTING MANAGER, SO DONT SET TO TRUE IF YOUR MANAGER DOESN'T SUPPORT IT
         autoHandlePingRemoval: if set to true, runs the output data through a filter removing any BackupService-Ping data, this to ensure compatability.
+
         '''
         # Variables
         self.parentPath = os.path.dirname(__file__)
         self.managerFormat = [3, "https://sbamboo.github.io/websa/docview/?markdown=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/managers/format3.md&css=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/managers/docs.css&json=https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/docs/docview_files.json",[2]]
         self.doCheckExistance = doCheckExistance
         self.autoHandlePingRemoval = autoHandlePingRemoval
+        self.autoFindGlobalManagerFile = autoFindGlobalManagerFile
         # Manager file
         if managersFile == "GLOBAL":
             managersFile = f"{self.parentPath}{os.sep}managers.jsonc"
@@ -259,7 +265,22 @@ class scoreboardConnector():
             self.encdec_dict = encryptor.encdec_dict
         # Dynamic storageTypes
         if managersFile != None and managersFile != "None":
-            dynamicManagers = self.GetDynamicImports(managersFile)
+            # Autofind global manager file
+            if self.autoFindGlobalManagerFile == True:
+                # get content
+                content_json = open(managersFile,'r').read()
+                content = json.loads(content_json)
+                # dynamicate
+                for _key,value in content.items():
+                    _path = value["path"]
+                    _suffix = f"managers" + _path.split("managers")[-1]
+                    _prefix = os.path.abspath(os.path.abspath(parentPath))
+                    _newpath = f"{_prefix}{os.sep}{_suffix}"
+                    content[_key]["path"] = _newpath
+                # Load
+                dynamicManagers = self.GetDynamicImports(managersFile,rawData=content)
+            else:
+                dynamicManagers = self.GetDynamicImports(managersFile)
             if storageType in list(dynamicManagers.keys()):
                 # check format
                 if ignoreManagerFormat == False:
@@ -281,7 +302,7 @@ class scoreboardConnector():
                 self.key = key
         else:
             self.key = None
-    # RemovePink
+    # RemovePing
     def _filterPing(self,jsonDict=None):
         if jsonDict != None and type(jsonDict) == dict and self.autoHandlePingRemoval == True:
             if jsonDict.get("GamehubBackupServicePing") != None:
@@ -380,22 +401,26 @@ class experimental_linkedDictionary():
         self.connector.remove(self.scoreboard)
 
 # Function to get TOS
-def gamehub_getTOS(net=bool()):
+def gamehub_getTOS(net=bool(),decode=True):
     if net == True:
         import requests
         r = requests.get("https://raw.githubusercontent.com/sbamboo/Gamehub/main/API/v2/tos.txt", allow_redirects=True)
-        return r.content
+        if decode == False:
+            return r.content
+        else:
+            return r.content.decode()
     else:
-        return open("..{os.sep}tos.txt",'r').read()
+        return open(f"{os.path.abspath(os.path.dirname(__file__))}{os.sep}tos.txt",'r').read()
 
 # Main function for handling a scoreboard from a function
 def gamehub_scoreboardFunc(
         encType=None,manager=None,apiKey=None,encKey=None,managerFile=None,ignoreManFormat=None,
         _scoreboard=str(),jsonData=dict(),
-        create=False,replace=False,remove=False,get=False,append=False, doesExist=False
+        create=False,replace=False,remove=False,get=False,append=False, doesExist=False,
+        doCheckExistance=None, autoHandlePingRemoval=True, autoFindGlobalManagerFile=True
     ):
     # Create scoreboardConnector
-    scoreboard = scoreboardConnector(encryptionType=encType, storageType=manager, key=apiKey, kryptographyKey=encKey, managersFile=managerFile, ignoreManagerFormat=ignoreManFormat)
+    scoreboard = scoreboardConnector(encryptionType=encType, storageType=manager, key=apiKey, kryptographyKey=encKey, managersFile=managerFile, ignoreManagerFormat=ignoreManFormat, doCheckExistance=, autoHandlePingRemoval=, autoFindGlobalManagerFile=)
     # Actions
     if create == True: return scoreboard.create(scoreboard=_scoreboard,jsonDict=jsonData)
     elif replace == True: return scoreboard.replace(scoreboard=_scoreboard,jsonDict=jsonData)
@@ -457,6 +482,9 @@ if __name__ == '__main__':
     parser.add_argument('--m_get', dest='m_get', help="mainAPI: Gets a scoreboard.", action='store_true')
     parser.add_argument('--m_append', dest='m_append', help="mainAPI: Appends data to a scoreboard.", action='store_true')
     parser.add_argument('--m_doesExist', dest='m_doesExist', help="mainAPI: Checks if a scoreboard exists.", action='store_true')
+    parser.add_argument('--m_doCheckExistance', dest='m_doCheckExistance', help="mainAPI: Flag for if the manager should check for scoreboard existance before calling, see format3.", action='store_true')
+    parser.add_argument('--m_autoHandlePingRemoval', dest='m_autoHandlePingRemoval', help="mainAPI: Should the connector filter backupService pings?.", action='store_true')
+    parser.add_argument('--m_autoFindGlobalManagerFile', dest='m_autoFindGlobalManagerFile', help="mainAPI: Should the connector attempt again to find the manager file.", action='store_true')
     ## [General]
     parser.add_argument('autoComsume', nargs='*', help="AutoConsume")
     # Get Inputs
@@ -499,7 +527,10 @@ if __name__ == '__main__':
         out = gamehub_getTOS(net=args.m_net)
         print(out)
     if args.asFunction == True:
-        out = gamehub_scoreboardFunc(encType=args.m_encType,manager=args.m_manager,apiKey=args.m_apiKey,encKey=args.m_encKey,managerFile=args.m_managerFile,ignoreManFormat=args.m_ignoreManFormat,_scoreboard=args.m_scoreboard,jsonData=args.m_jsonData,create=args.m_create,replace=args.m_replace,remove=args.m_remove,get=args.m_get,append=args.m_append,doesExist=args.m_doesExist)
+        if args.doCheckExistance != None:
+            out = gamehub_scoreboardFunc(encType=args.m_encType,manager=args.m_manager,apiKey=args.m_apiKey,encKey=args.m_encKey,managerFile=args.m_managerFile,ignoreManFormat=args.m_ignoreManFormat,_scoreboard=args.m_scoreboard,jsonData=args.m_jsonData,create=args.m_create,replace=args.m_replace,remove=args.m_remove,get=args.m_get,append=args.m_append,doesExist=args.m_doesExist,autoHandlePingRemoval=args.m_autoHandlePingRemoval,autoFindGlobalManagerFile=args.m_autoFindGlobalManagerFile,doCheckExistance=args.m_doCheckExistance)
+        else:
+            out = gamehub_scoreboardFunc(encType=args.m_encType,manager=args.m_manager,apiKey=args.m_apiKey,encKey=args.m_encKey,managerFile=args.m_managerFile,ignoreManFormat=args.m_ignoreManFormat,_scoreboard=args.m_scoreboard,jsonData=args.m_jsonData,create=args.m_create,replace=args.m_replace,remove=args.m_remove,get=args.m_get,append=args.m_append,doesExist=args.m_doesExist,autoHandlePingRemoval=args.m_autoHandlePingRemoval,autoFindGlobalManagerFile=args.m_autoFindGlobalManagerFile)
         print(out)
 
 # Info
