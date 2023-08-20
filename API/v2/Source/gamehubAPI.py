@@ -420,7 +420,7 @@ def gamehub_scoreboardFunc(
         doCheckExistance=None, autoHandlePingRemoval=True, autoFindGlobalManagerFile=True
     ):
     # Create scoreboardConnector
-    scoreboard = scoreboardConnector(encryptionType=encType, storageType=manager, key=apiKey, kryptographyKey=encKey, managersFile=managerFile, ignoreManagerFormat=ignoreManFormat, doCheckExistance=, autoHandlePingRemoval=, autoFindGlobalManagerFile=)
+    scoreboard = scoreboardConnector(encryptionType=encType, storageType=manager, key=apiKey, kryptographyKey=encKey, managersFile=managerFile, ignoreManagerFormat=ignoreManFormat, doCheckExistance=doCheckExistance, autoHandlePingRemoval=autoHandlePingRemoval, autoFindGlobalManagerFile=autoFindGlobalManagerFile)
     # Actions
     if create == True: return scoreboard.create(scoreboard=_scoreboard,jsonDict=jsonData)
     elif replace == True: return scoreboard.replace(scoreboard=_scoreboard,jsonDict=jsonData)
