@@ -161,9 +161,18 @@ def gamehub_singleSave_score(
     # Get Current Data
     current = gh.gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], get=True, doCheckExistance=doCheckExistance,autoHandlePingRemoval=autoHandlePingRemoval,autoFindGlobalManagerFile=autoFindGlobalManagerFile)
     # Check
+    if current.get(user) == None:
+        current[user] = {"score":"-1"}
     if int(current[user]["score"]) < int(_dict["data"]["score"]):
         _jsonData = {_dict["user"] : _dict["data"]}
         gh.gamehub_scoreboardFunc(encType=encType,manager=manager,apiKey=apiKey,encKey=encKey,managerFile=managerFile,ignoreManFormat=ignoreManFormat,_scoreboard=_dict["scoreboard"], jsonData=_jsonData, append=True, doCheckExistance=doCheckExistance,autoHandlePingRemoval=autoHandlePingRemoval,autoFindGlobalManagerFile=autoFindGlobalManagerFile)
+
+# Function to sort a scoreboard
+def sortScoreboard(scoreboardDict=dict):
+    return dict(sorted(scoreboardDict.items(), key=lambda item: int(item[1]["score"]), reverse=True))
+def sortScoreboardJson(scoreboardJson=str):
+    sortedDict = sortScoreboard(json.loads(scoreboardJson))
+    return json.dumps(sortedDict)
 
 # Function to remove comments from json
 def removeComments(json_string):
@@ -413,6 +422,20 @@ def gamehub_backupService_quickUnshedule(apiConfPath,scoreboard):
     gamehub_backupService(mode="unschedule",apiConfPath=apiConfPath,scoreboard=scoreboard)
 # TODO: Add restoreFromLatestBackup and the ability to autoDetect removal and autoRestore to the gamehub_backupService function
 
+def _imfProtocol(string):
+    if "§imf§:" in str(string):
+        string = string.replace("§s§"," ")
+        string = string.replace("§q§","'")
+        string = string.replace("§Q§",'"')
+        string = string.replace("§imf§:","")
+    if "!imf-swq!" in string:
+        string = string.replace("'","!q!")
+        string = string.replace('"',"!dq!")
+        string = string.replace("!q!",'"')
+        string = string.replace("!dq!","'")
+        string = string.replace("!imf-swq!","")
+    return string
+
 # ========================================================[CLI Executor]========================================================
 if __name__ == '__main__':
     import argparse
@@ -438,6 +461,8 @@ if __name__ == '__main__':
     parser.add_argument('--internal_ep', dest="it_ep", action='store_true', help="EasyPass (Takes string and None/Bool casts it)")
     parser.add_argument('--internal_linkFileExist', dest="it_linkFexi", action='store_true', help="Does a link file exist?")
     parser.add_argument('--internal_getAPIConfig', dest="it_getApiConf", action='store_true', help="Gets the apiConf data and handles secure-config")
+    ## [Others]
+    parser.add_argument('--sortScoreboardJson', dest="ot_sort", action='store_true', help="Sorts a json scoreboard and returns json (Takes string)")
     ## [General]
     parser.add_argument('autoComsume', nargs='*', help="AutoConsume")
     # Arguments
@@ -497,6 +522,7 @@ if __name__ == '__main__':
     parser.add_argument('-it_linkedFile', dest="it_linkedFile", help="Internal: Linked file (str)")
     parser.add_argument('-it_apiConfPath', dest="it_apiConfPath", help="Internal: APIconf path (str)")
     ## [General]
+    parser.add_argument('-json', dest="ot_json", help="Json to pass (str)")
     parser.add_argument('--autoPath', dest="autopath", help="EXPERIMENTAL, DEBUG PURPOSES", action="store_true")
     # Get Inputs
     args = parser.parse_args(sys.argv)
@@ -533,11 +559,7 @@ if __name__ == '__main__':
         print(ans)
     if args.qu_apiconfFunc_ovmf:
         # imf protcol for services 
-        if "§imf§:" in str(args.qu_dictData):
-            args.qu_dictData = args.qu_dictData.replace("§s§"," ")
-            args.qu_dictData = args.qu_dictData.replace("§q§","'")
-            args.qu_dictData = args.qu_dictData.replace("§Q§",'"')
-            args.qu_dictData = args.qu_dictData.replace("§imf§:","")
+        args.qu_dictData = _imfProtocol(str(args.qu_dictData))
         ans =  apiConfig_gamehub_scoreboardFunc(apiConfPath=args.qu_apiConfPath,scoreboard=args.qu_scoreboard,jsonData=args.qu_dictData, create=args.qu_create,replace=args.qu_replace,remove=args.qu_remove,get=args.qu_get,append=args.qu_append, doesExist=args.qu_doesExist, managerOverwrite=args.qu_managerFile,
                 doCheckExistance=args.qu_doCheckExistance,autoHandlePingRemoval=args.qu_autoHandlePingRemoval,autoFindGlobalManagerFile=args.qu_autoFindGlobalManagerFile
                )
@@ -576,12 +598,17 @@ if __name__ == '__main__':
     if args.ss_off:
         ans =  gamehub_saveService_off(exitFile=args.ss_exitFile)
         print(ans)
+    ## [Other]
+    if args.ot_sort:
+        args.ot_json = _imfProtocol(args.ot_json)
+        ans = sortScoreboardJson(args.ot_json)
+        print(ans)
     ## [Internal]
     if args.it_ep:
-        ans =  _ep(it_inp)
+        ans =  _ep(args.it_inp)
         print(ans)
     if args.it_linkFexi:
-        ans =  _linkFileExist(it_linkedFile)
+        ans =  _linkFileExist(args.it_linkedFile)
         print(ans)
     if args.it_getApiConf:
         ans = getAPIConfig(args.it_apiConfPath)

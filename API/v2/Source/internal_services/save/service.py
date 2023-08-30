@@ -27,6 +27,7 @@ def parse_arguments(args):
     return parsed_args
 args = parse_arguments(sys.argv)
 
+
 # [Window] - Functions from conUtils by Simon Kalmi Claesson
 def setConTitle(title):
     # Get platform
@@ -60,11 +61,12 @@ def setConSize(width,height):
         return f"\033[31mError: Platform {platformv} not supported yet!\033[0m"
 setConTitle("Gamehub SaveService")
 setConSize(60, 15)
+
 # [Setup]
 parent = os.path.dirname(__file__)
-_fs = fromPath(f"{parent}\\..\\libs\\libfilesys.py")
+_fs = fromPath(f"{parent}\\..\\..\\libs\\libfilesys.py")
 fs = _fs.filesys
-qu = fromPath(f"{parent}\\..\\quickuseAPI.py")
+qu = fromPath(f"{parent}\\..\\..\\quickuseAPI.py")
 
 # [Listener]
 qu.saveServiceFunction(apiConfPath=args["apiConf"],linkedFile=args["linkedFile"],exitFile=args["exitFile"],doEncrypt=args["doEncrypt"],verbose=args["verbose"],simpleScore=args["simpleScore"])
