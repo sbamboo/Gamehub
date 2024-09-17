@@ -1,0 +1,1 @@
+/mnt/c/users/simonkalmi.claesson/documents/github/Gamehub/API/v2/Source/toolsets/RusticComponents/target/x86_64-unknown-linux-gnu/debug/libRusticComponents.so: /mnt/c/users/simonkalmi.claesson/documents/github/Gamehub/API/v2/Source/toolsets/RusticComponents/src/lib.rs

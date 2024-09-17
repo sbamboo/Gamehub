@@ -124,9 +124,9 @@ build_target() {
     printf "\n"
 }
 
+
 # Function to remove builds
-# Function to remove builds
-remBuilds() {
+remBuilds_lnx() {
     if [ "$response" == "" ]; then
         printf "${impo_prefix}Do you really want to remove all builds? [y/n]: "
         read -r response
@@ -138,6 +138,28 @@ remBuilds() {
         [yY])
             printf "${info_prefix}Removing builds...\n"
             rm -rf $project/target
+            printf "${info_prefix}Builds removed.\n"
+            ;;
+        [nN])
+            printf "${info_prefix}Build removal aborted.\n"
+            ;;
+        *)
+            printf "${error_prefix}Invalid response. Please enter 'y' or 'n'.\n"
+            ;;
+    esac
+}
+remBuilds_mac() {
+    if [ "$response" == "" ]; then
+        printf "${impo_prefix}Do you really want to remove all builds? [y/n]: "
+        read -r response
+    else
+        printf "${impo_prefix}Do you really want to remove all builds? [y/n]: ${response}\n"
+    fi
+
+    case "$response" in
+        [yY])
+            printf "${info_prefix}Removing builds...\n"
+            rm -RF $project/target
             printf "${info_prefix}Builds removed.\n"
             ;;
         [nN])
@@ -167,7 +189,19 @@ done
 for arg in "$@"; do
     case "$arg" in
         --remBuilds)
-            remBuilds
+             # Check the operating system and call the appropriate setup function
+            case "$platform" in
+                lnx)
+                    remBuilds_lnx
+                    ;;
+                mac)
+                    remBuilds_mac
+                    ;;
+                *)
+                    printf "${error_prefix}Unsupported operating system.\n"
+                    nexit 1
+                    ;;
+            esac
             nexit 0
             ;;
         --setup)
